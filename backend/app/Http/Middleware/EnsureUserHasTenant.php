@@ -2,12 +2,15 @@
 
 namespace App\Http\Middleware;
 
+use App\Tenancy\TenantContext;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserHasTenant
 {
+    public function __construct(private readonly TenantContext $tenantContext) {}
+
     /**
      * Handle an incoming request.
      *
@@ -15,15 +18,15 @@ class EnsureUserHasTenant
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
+        $user = $this->tenantContext->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'message' => 'Unauthenticated.',
             ], 401);
         }
 
-        if (!$user->tenant_id || !$user->tenant) {
+        if (! $this->tenantContext->hasTenant()) {
             return response()->json([
                 'message' => 'This user is not assigned to a tenant.',
             ], 403);

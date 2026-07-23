@@ -1,24 +1,27 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware('tenant')->get('/tenant-check', function (Request $request) {
+Route::middleware('tenant')->get('/tenant-check', function (TenantContext $tenantContext) {
+    $user = $tenantContext->user();
+    $tenant = $tenantContext->tenant();
+
     return response()->json([
         'message' => 'Tenant access granted.',
         'user' => [
-            'id' => $request->user()->id,
-            'name' => $request->user()->name,
-            'email' => $request->user()->email,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
         ],
         'tenant' => [
-            'id' => $request->user()->tenant->id,
-            'name' => $request->user()->tenant->name,
-            'slug' => $request->user()->tenant->slug,
+            'id' => $tenant->id,
+            'name' => $tenant->name,
+            'slug' => $tenant->slug,
         ],
     ]);
 });
