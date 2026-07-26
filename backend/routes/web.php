@@ -25,3 +25,13 @@ Route::middleware('tenant')->get('/tenant-check', function (TenantContext $tenan
         ],
     ]);
 });
+
+Route::middleware([
+    'tenant',
+    'permission:roles.manage',
+])->get('/rbac-check', function () {
+    return response()->json([
+        'message' => 'Permission granted.',
+        'permission' => 'roles.manage',
+    ]);
+});

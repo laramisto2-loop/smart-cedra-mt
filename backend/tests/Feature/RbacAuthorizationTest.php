@@ -162,6 +162,62 @@ class RbacAuthorizationTest extends TestCase
         );
     }
 
+    public function test_tenant_admin_can_access_roles_management_route(): void
+    {
+        $admin = User::query()
+            ->where('email', 'admin@cedra.test')
+            ->firstOrFail();
+
+        $response = $this
+            ->actingAs($admin)
+            ->getJson('/rbac-check');
+
+        $response
+            ->assertOk()
+            ->assertJson([
+                'message' => 'Permission granted.',
+                'permission' => 'roles.manage',
+            ]);
+    }
+
+    public function test_coordinator_cannot_access_roles_management_route(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $role = $this->findRole($tenant, 'coordinator');
+
+        $coordinator = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $coordinator->assignRole($role);
+
+        $this->actingAs($coordinator)
+            ->getJson('/rbac-check')
+            ->assertForbidden();
+    }
+
+    public function test_field_agent_cannot_access_roles_management_route(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $role = $this->findRole($tenant, 'field_agent');
+
+        $fieldAgent = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $fieldAgent->assignRole($role);
+
+        $this->actingAs($fieldAgent)
+            ->getJson('/rbac-check')
+            ->assertForbidden();
+    }
+
+    public function test_unauthenticated_user_cannot_access_roles_management_route(): void
+    {
+        $this->getJson('/rbac-check')
+            ->assertUnauthorized();
+    }
+
     private function findTenant(string $slug): Tenant
     {
         return Tenant::query()
