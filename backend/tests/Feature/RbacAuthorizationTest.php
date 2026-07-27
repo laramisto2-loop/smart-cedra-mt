@@ -295,6 +295,109 @@ class RbacAuthorizationTest extends TestCase
         );
     }
 
+    public function test_tenant_admin_can_manage_users_in_their_own_tenant(): void
+    {
+        $admin = User::query()
+            ->where('email', 'admin@cedra.test')
+            ->firstOrFail();
+
+        $targetUser = User::factory()->create([
+            'tenant_id' => $admin->tenant_id,
+        ]);
+
+        $this->assertTrue(
+            Gate::forUser($admin)->allows('viewAny', User::class)
+        );
+
+        $this->assertTrue(
+            Gate::forUser($admin)->allows('create', User::class)
+        );
+
+        $this->assertTrue(
+            Gate::forUser($admin)->allows('view', $targetUser)
+        );
+
+        $this->assertTrue(
+            Gate::forUser($admin)->allows('update', $targetUser)
+        );
+
+        $this->assertTrue(
+            Gate::forUser($admin)->allows('delete', $targetUser)
+        );
+    }
+
+    public function test_tenant_admin_cannot_manage_another_tenants_user(): void
+    {
+        $admin = User::query()
+            ->where('email', 'admin@cedra.test')
+            ->firstOrFail();
+
+        $otherTenant = $this->findTenant('lebanon-future');
+
+        $otherTenantUser = User::factory()->create([
+            'tenant_id' => $otherTenant->id,
+        ]);
+
+        $this->assertFalse(
+            Gate::forUser($admin)->allows('view', $otherTenantUser)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($admin)->allows('update', $otherTenantUser)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($admin)->allows('delete', $otherTenantUser)
+        );
+    }
+
+    public function test_tenant_admin_cannot_delete_their_own_account(): void
+    {
+        $admin = User::query()
+            ->where('email', 'admin@cedra.test')
+            ->firstOrFail();
+
+        $this->assertFalse(
+            Gate::forUser($admin)->allows('delete', $admin)
+        );
+    }
+
+    public function test_coordinator_cannot_manage_users_through_policy(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $coordinatorRole = $this->findRole($tenant, 'coordinator');
+
+        $coordinator = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $targetUser = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $coordinator->assignRole($coordinatorRole);
+
+        $this->assertFalse(
+            Gate::forUser($coordinator)->allows('viewAny', User::class)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($coordinator)->allows('create', User::class)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($coordinator)->allows('view', $targetUser)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($coordinator)->allows('update', $targetUser)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($coordinator)->allows('delete', $targetUser)
+        );
+    }
+
     private function findTenant(string $slug): Tenant
     {
         return Tenant::query()
