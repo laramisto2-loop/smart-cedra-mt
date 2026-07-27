@@ -6,8 +6,10 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use LogicException;
 
 class User extends Authenticatable
 {
@@ -52,5 +54,52 @@ class User extends Authenticatable
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class)
+            ->where('roles.tenant_id', $this->tenant_id);
+    }
+
+    public function assignRole(Role $role): void
+    {
+        if (
+            $this->tenant_id === null ||
+            (int) $role->tenant_id !== (int) $this->tenant_id
+        ) {
+            throw new LogicException(
+                'A user may only receive roles belonging to their own tenant.'
+            );
+        }
+
+        $this->roles()->syncWithoutDetaching([$role->id]);
+    }
+
+    public function removeRole(Role $role): void
+    {
+        if ((int) $role->tenant_id !== (int) $this->tenant_id) {
+            throw new LogicException(
+                'A user may only remove roles belonging to their own tenant.'
+            );
+        }
+
+        $this->roles()->detach($role->id);
+    }
+
+    public function hasRole(string $roleSlug): bool
+    {
+        return $this->roles()
+            ->where('roles.slug', $roleSlug)
+            ->exists();
+    }
+
+    public function hasPermission(string $permissionSlug): bool
+    {
+        return $this->roles()
+            ->whereHas('permissions', function ($query) use ($permissionSlug): void {
+                $query->where('permissions.slug', $permissionSlug);
+            })
+            ->exists();
     }
 }
