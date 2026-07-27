@@ -8,6 +8,7 @@ use App\Models\User;
 use Database\Seeders\RbacSeeder;
 use Database\Seeders\TenantSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use LogicException;
 use Tests\TestCase;
 
@@ -216,6 +217,82 @@ class RbacAuthorizationTest extends TestCase
     {
         $this->getJson('/rbac-check')
             ->assertUnauthorized();
+    }
+
+    public function test_tenant_admin_can_manage_roles_in_their_own_tenant(): void
+    {
+        $admin = User::query()
+            ->where('email', 'admin@cedra.test')
+            ->firstOrFail();
+
+        $ownRole = $this->findRole(
+            $this->findTenant('cedra-campaign'),
+            'coordinator'
+        );
+
+        $this->assertTrue(
+            Gate::forUser($admin)->allows('viewAny', Role::class)
+        );
+
+        $this->assertTrue(
+            Gate::forUser($admin)->allows('create', Role::class)
+        );
+
+        $this->assertTrue(
+            Gate::forUser($admin)->allows('update', $ownRole)
+        );
+
+        $this->assertTrue(
+            Gate::forUser($admin)->allows('delete', $ownRole)
+        );
+    }
+
+    public function test_tenant_admin_cannot_manage_another_tenants_role(): void
+    {
+        $admin = User::query()
+            ->where('email', 'admin@cedra.test')
+            ->firstOrFail();
+
+        $otherTenantRole = $this->findRole(
+            $this->findTenant('lebanon-future'),
+            'coordinator'
+        );
+
+        $this->assertFalse(
+            Gate::forUser($admin)->allows('view', $otherTenantRole)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($admin)->allows('update', $otherTenantRole)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($admin)->allows('delete', $otherTenantRole)
+        );
+    }
+
+    public function test_coordinator_cannot_manage_roles_through_policy(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $coordinatorRole = $this->findRole($tenant, 'coordinator');
+
+        $coordinator = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $coordinator->assignRole($coordinatorRole);
+
+        $this->assertFalse(
+            Gate::forUser($coordinator)->allows('viewAny', Role::class)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($coordinator)->allows('create', Role::class)
+        );
+
+        $this->assertFalse(
+            Gate::forUser($coordinator)->allows('update', $coordinatorRole)
+        );
     }
 
     private function findTenant(string $slug): Tenant
