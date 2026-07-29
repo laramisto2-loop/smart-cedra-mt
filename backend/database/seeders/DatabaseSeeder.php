@@ -11,6 +11,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TenantSeeder::class,
             RbacSeeder::class,
+            GeographySeeder::class,
         ]);
     }
 }
+
+// The order is important:
+// Tenants first
+// → roles and permissions
+// → tenant-owned geography
