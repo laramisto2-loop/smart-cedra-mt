@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use App\Models\Concerns\BelongsToTenant;
 use App\Models\Concerns\EnsuresParentBelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PollingStation extends Model
 {
-    use BelongsToTenant, EnsuresParentBelongsToTenant, HasFactory;
+    use Auditable, BelongsToTenant, EnsuresParentBelongsToTenant, HasFactory;
 
     protected $fillable = [
         'tenant_id',
