@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AreaController;
+use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\DistrictController;
 use App\Http\Controllers\Api\GovernorateController;
 use App\Http\Controllers\Api\PollingCenterController;
@@ -21,4 +22,9 @@ Route::middleware('tenant')->group(function (): void {
         'polling-stations',
         PollingStationController::class
     );
+
+    Route::apiResource(
+        'audit-logs',
+        AuditLogController::class
+    )->only(['index', 'show']);
 });
