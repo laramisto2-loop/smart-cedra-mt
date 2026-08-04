@@ -59,8 +59,7 @@ class User extends Authenticatable
 
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Role::class)
-            ->where('roles.tenant_id', $this->tenant_id);
+        return $this->belongsToMany(Role::class);
     }
 
     public function assignRole(Role $role): void

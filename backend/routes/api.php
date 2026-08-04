@@ -6,9 +6,18 @@ use App\Http\Controllers\Api\DistrictController;
 use App\Http\Controllers\Api\GovernorateController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('tenant')->group(function (): void {
+Route::middleware([
+    'auth:sanctum',
+    'tenant',
+])->group(function (): void {
+    Route::get(
+        'user',
+        [AuthenticatedSessionController::class, 'show']
+    )->name('user.show');
+
     Route::apiResource('governorates', GovernorateController::class);
     Route::apiResource('districts', DistrictController::class);
     Route::apiResource('areas', AreaController::class);
