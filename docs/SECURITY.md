@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the initial security risks and planned protections for the Smart Cedra Multi-Tenant Campaign Management Platform.
+This document defines the initial security risks and planned protections for the ElectoFlow Multi-Tenant Campaign Management Platform.
 
 The platform handles campaign operations, CRM contacts, messaging workflows, field activity, and election result ingestion. It does not support electronic voting.
 

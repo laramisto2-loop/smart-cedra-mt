@@ -1,4 +1,4 @@
-# Smart Cedra MT Platform
+# ElectoFlow Multi-Tenant Campaign Platform
 
 Multi-Tenant Campaign Management & Election Operations Platform.
 
