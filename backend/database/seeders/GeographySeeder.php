@@ -24,7 +24,7 @@ class GeographySeeder extends Seeder
         $governorate = Governorate::withoutGlobalScopes()->updateOrCreate(
             [
                 'tenant_id' => $tenant->id,
-                'code' => 'BEY',
+                'code' => 'LB-BA',
             ],
             [
                 'name_en' => 'Beirut',

@@ -1,7 +1,9 @@
+import { useState } from 'react'
+import GovernoratesPage from './GovernoratesPage.jsx'
 import '../App.css'
 
 const navigationItems = [
-  { label: 'Dashboard', icon: '▦', active: true },
+  { label: 'Dashboard', icon: '▦' },
   { label: 'Users', icon: '👥' },
   { label: 'Geography', icon: '📍' },
   { label: 'Contacts', icon: '📇' },
@@ -35,6 +37,7 @@ const statistics = [
 ]
 
 function Dashboard({ user, onLogout }) {
+  const [activePage, setActivePage] = useState('Dashboard')
   const initials = user.name
     .split(' ')
     .map((part) => part[0])
@@ -70,7 +73,17 @@ function Dashboard({ user, onLogout }) {
             <button
               type="button"
               key={item.label}
-              className={`navigation-item ${item.active ? 'active' : ''}`}
+              className={`navigation-item ${
+                activePage === item.label ? 'active' : ''
+              }`}
+              onClick={() => {
+              if (
+                  item.label === 'Dashboard' ||
+                  item.label === 'Geography'
+                  ) {
+                      setActivePage(item.label)
+                    }
+                }}
             >
               <span className="navigation-icon" aria-hidden="true">
                 {item.icon}
@@ -90,7 +103,7 @@ function Dashboard({ user, onLogout }) {
         <header className="topbar">
           <div>
             <p className="eyebrow">Tenant administration</p>
-            <h2>Dashboard</h2>
+            <h2>{activePage}</h2>
           </div>
 
           <div className="user-profile">
@@ -110,6 +123,11 @@ function Dashboard({ user, onLogout }) {
             </button>
           </div>
         </header>
+
+        {activePage === 'Geography' ? (
+          <GovernoratesPage user={user} />
+        ) : (
+         <>
 
         <section className="welcome-panel">
           <div>
@@ -210,6 +228,8 @@ function Dashboard({ user, onLogout }) {
             </ul>
           </article>
         </section>
+        </>
+        )}
       </main>
     </div>
   )

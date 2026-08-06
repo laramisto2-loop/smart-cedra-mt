@@ -696,3 +696,365 @@
     display: grid;
   }
 }
+
+.geography-page {
+  min-width: 0;
+}
+
+.page-heading {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.page-heading h2 {
+  margin: 0;
+  color: #18314f;
+  font-size: 25px;
+}
+
+.page-description {
+  margin: 7px 0 0;
+  color: #728196;
+  font-size: 13px;
+}
+
+.primary-button {
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: #167ead;
+  color: #ffffff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: #126e99;
+}
+
+.geography-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.state-message,
+.empty-state {
+  margin: 0;
+  padding: 48px 24px;
+  color: #728196;
+  text-align: center;
+}
+
+.empty-state h3 {
+  margin: 0 0 7px;
+  color: #18314f;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.error-message {
+  margin: 24px;
+  padding: 13px 15px;
+  border: 1px solid #f0b9b9;
+  border-radius: 9px;
+  background: #fff0f0;
+  color: #a43535;
+  font-size: 13px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.geography-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #314c69;
+  font-size: 13px;
+}
+
+.geography-table th,
+.geography-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #e4eaf1;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.geography-table th {
+  background: #f8fafc;
+  color: #6c7b8f;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.geography-table tbody tr:hover {
+  background: #f8fbfd;
+}
+
+.geography-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.code-pill {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e4f4fb;
+  color: #1478a5;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.text-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #167ead;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.text-button.danger {
+  color: #b44040;
+}
+
+.pagination {
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  border-top: 1px solid #e4eaf1;
+  color: #728196;
+  font-size: 12px;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 760px) {
+  .page-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .primary-button {
+    align-self: flex-start;
+  }
+
+  .geography-table th,
+  .geography-table td {
+    padding: 13px;
+  }
+
+  .pagination {
+    justify-content: center;
+  }
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: 20px;
+  display: grid;
+  place-items: center;
+  background: rgb(15 35 58 / 58%);
+  backdrop-filter: blur(2px);
+}
+
+.modal-card {
+  width: min(100%, 520px);
+  max-height: calc(100vh - 40px);
+  padding: 26px;
+  overflow-y: auto;
+  border: 1px solid #dce5ef;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgb(10 31 53 / 28%);
+}
+
+.modal-heading {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.modal-heading h3 {
+  margin: 0;
+  color: #18314f;
+  font-size: 22px;
+}
+
+.modal-close {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d7e1eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #60738a;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  background: #f3f7fa;
+}
+
+.modal-card .error-message {
+  margin: 0 0 18px;
+}
+
+.field-error {
+  color: #b44040;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.modal-actions {
+  margin-top: 26px;
+  padding-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 11px;
+  border-top: 1px solid #e4eaf1;
+}
+
+.modal-actions button:disabled,
+.modal-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 560px) {
+  .modal-backdrop {
+    padding: 12px;
+  }
+
+  .modal-card {
+    padding: 22px 18px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}
+
+.form-field select {
+  width: 100%;
+  padding: 12px 38px 12px 13px;
+  border: 1px solid #cad7e4;
+  border-radius: 9px;
+  outline: none;
+  background: #ffffff;
+  color: #18314f;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.form-field select:focus {
+  border-color: #28a9e2;
+  box-shadow: 0 0 0 3px rgb(40 169 226 / 14%);
+}
+
+.form-field select:invalid {
+  color: #7d8b9c;
+}
+
+.form-field input[readonly] {
+  background: #f3f7fa;
+  color: #60738a;
+  cursor: default;
+}
+
+.confirmation-dialog {
+  width: min(100%, 440px);
+  text-align: center;
+}
+
+.confirmation-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 17px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff0f0;
+  color: #b44040;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.confirmation-dialog h3 {
+  margin: 0;
+  color: #18314f;
+  font-size: 22px;
+}
+
+.confirmation-dialog > p {
+  margin: 12px 0 0;
+  color: #6c7b8f;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.confirmation-dialog .error-message {
+  margin: 20px 0 0;
+  text-align: left;
+}
+
+.confirmation-dialog .modal-actions {
+  justify-content: center;
+}
+
+.delete-button {
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: #b44040;
+  color: #ffffff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.delete-button:hover:not(:disabled) {
+  background: #963535;
+}
+
+.delete-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
