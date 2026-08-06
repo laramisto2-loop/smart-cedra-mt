@@ -40,7 +40,7 @@ class GeographyIsolationTest extends TestCase
             'governorate_id' => $governorate->id,
             'name_en' => 'Beirut',
             'name_ar' => 'بيروت',
-            'code' => 'BEY-D',
+            'code' => 'LB-BA-BEIRUT',
         ]);
 
         $area = Area::create([

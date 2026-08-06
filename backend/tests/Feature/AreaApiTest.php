@@ -48,7 +48,7 @@ class AreaApiTest extends TestCase
             $cedraTenant,
             $cedraGovernorate,
             'Beirut District',
-            'BEY-D'
+            'LB-BA-BEIRUT'
         );
 
         $secondDistrict = $this->createDistrict(
@@ -127,7 +127,7 @@ class AreaApiTest extends TestCase
             $tenant,
             $governorate,
             'Beirut District',
-            'BEY-D'
+            'LB-BA-BEIRUT'
         );
 
         $createResponse = $this->actingAs($this->cedraAdmin())
@@ -195,7 +195,7 @@ class AreaApiTest extends TestCase
             $cedraTenant,
             $cedraGovernorate,
             'Beirut District',
-            'BEY-D'
+            'LB-BA-BEIRUT'
         );
 
         $futureGovernorate = $this->createGovernorate(
@@ -258,7 +258,7 @@ class AreaApiTest extends TestCase
             $tenant,
             $governorate,
             'Beirut District',
-            'BEY-D'
+            'LB-BA-BEIRUT'
         );
 
         $this->actingAs($this->cedraAdmin())
@@ -293,7 +293,7 @@ class AreaApiTest extends TestCase
             $tenant,
             $governorate,
             'Beirut District',
-            'BEY-D'
+            'LB-BA-BEIRUT'
         );
 
         $area = $this->createArea(
@@ -346,7 +346,7 @@ class AreaApiTest extends TestCase
             $tenant,
             $governorate,
             'Beirut District',
-            'BEY-D'
+            'LB-BA-BEIRUT'
         );
 
         $area = $this->createArea(

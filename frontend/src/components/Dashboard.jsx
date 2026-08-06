@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import GovernoratesPage from './GovernoratesPage.jsx'
+import GeographyPage from './GeographyPage.jsx'
 import '../App.css'
 
 const navigationItems = [
@@ -125,7 +125,7 @@ function Dashboard({ user, onLogout }) {
         </header>
 
         {activePage === 'Geography' ? (
-          <GovernoratesPage user={user} />
+          <GeographyPage user={user} /> 
         ) : (
          <>
 

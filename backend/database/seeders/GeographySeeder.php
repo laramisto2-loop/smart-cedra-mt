@@ -35,7 +35,7 @@ class GeographySeeder extends Seeder
         $district = District::withoutGlobalScopes()->updateOrCreate(
             [
                 'tenant_id' => $tenant->id,
-                'code' => 'BEY-D',
+                'code' => 'LB-BA-BEIRUT',
             ],
             [
                 'governorate_id' => $governorate->id,
