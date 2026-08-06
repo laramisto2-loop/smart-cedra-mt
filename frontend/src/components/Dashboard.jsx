@@ -125,7 +125,7 @@ function Dashboard({ user, onLogout }) {
         </header>
 
         {activePage === 'Geography' ? (
-          <GeographyPage user={user} /> 
+                 <GeographyPage user={user} />
         ) : (
          <>
 
