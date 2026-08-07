@@ -24,7 +24,7 @@ class GeographySeeder extends Seeder
         $governorate = Governorate::withoutGlobalScopes()->updateOrCreate(
             [
                 'tenant_id' => $tenant->id,
-                'code' => 'BEY',
+                'code' => 'LB-BA',
             ],
             [
                 'name_en' => 'Beirut',
@@ -35,7 +35,7 @@ class GeographySeeder extends Seeder
         $district = District::withoutGlobalScopes()->updateOrCreate(
             [
                 'tenant_id' => $tenant->id,
-                'code' => 'BEY-D',
+                'code' => 'LB-BA-BEIRUT',
             ],
             [
                 'governorate_id' => $governorate->id,
@@ -47,7 +47,7 @@ class GeographySeeder extends Seeder
         $area = Area::withoutGlobalScopes()->updateOrCreate(
             [
                 'tenant_id' => $tenant->id,
-                'code' => 'ACH',
+                'code' => 'LB-BA-BEIRUT-ACHRAFIEH',
             ],
             [
                 'district_id' => $district->id,
@@ -60,7 +60,7 @@ class GeographySeeder extends Seeder
         $pollingCenter = PollingCenter::withoutGlobalScopes()->updateOrCreate(
             [
                 'tenant_id' => $tenant->id,
-                'code' => 'ACH-PC-01',
+                'code' => 'LB-BA-BEIRUT-ACHRAFIEH-PUBLIC-SCHOOL',
             ],
             [
                 'area_id' => $area->id,

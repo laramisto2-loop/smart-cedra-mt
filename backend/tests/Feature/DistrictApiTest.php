@@ -59,7 +59,7 @@ class DistrictApiTest extends TestCase
             $cedraTenant,
             $beirut,
             'Beirut District',
-            'BEY-D'
+            'LB-BA-BEIRUT'
         );
 
         $this->createDistrict(
@@ -92,7 +92,7 @@ class DistrictApiTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment([
-                'code' => 'BEY-D',
+                'code' => 'LB-BA-BEIRUT',
             ])
             ->assertJsonMissing([
                 'code' => 'BAA',
@@ -114,12 +114,12 @@ class DistrictApiTest extends TestCase
                 'governorate_id' => $governorate->id,
                 'name_en' => 'Beirut District',
                 'name_ar' => 'قضاء بيروت',
-                'code' => 'BEY-D',
+                'code' => 'LB-BA-BEIRUT',
             ]);
 
         $createResponse
             ->assertCreated()
-            ->assertJsonPath('data.code', 'BEY-D')
+            ->assertJsonPath('data.code', 'LB-BA-BEIRUT')
             ->assertJsonPath(
                 'data.governorate.id',
                 $governorate->id
@@ -131,12 +131,12 @@ class DistrictApiTest extends TestCase
             'id' => $districtId,
             'tenant_id' => $tenant->id,
             'governorate_id' => $governorate->id,
-            'code' => 'BEY-D',
+            'code' => 'LB-BA-BEIRUT',
         ]);
 
         $this->getJson("/api/districts/{$districtId}")
             ->assertOk()
-            ->assertJsonPath('data.code', 'BEY-D');
+            ->assertJsonPath('data.code', 'LB-BA-BEIRUT');
 
         $this->patchJson("/api/districts/{$districtId}", [
             'name_en' => 'Beirut District Updated',
@@ -219,7 +219,7 @@ class DistrictApiTest extends TestCase
             $tenant,
             $governorate,
             'Beirut District',
-            'BEY-D'
+            'LB-BA-BEIRUT'
         );
 
         $coordinator = $this->createUserWithRole(
@@ -264,7 +264,7 @@ class DistrictApiTest extends TestCase
             $tenant,
             $governorate,
             'Beirut District',
-            'BEY-D'
+            'LB-BA-BEIRUT'
         );
 
         $fieldAgent = $this->createUserWithRole(

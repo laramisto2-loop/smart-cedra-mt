@@ -40,7 +40,7 @@ class GeographyAuthorizationTest extends TestCase
 
         $governorate = $this->findGovernorate(
             $admin->tenant_id,
-            'BEY'
+            'LB-BA'
         );
 
         $this->assertTrue(
@@ -68,7 +68,7 @@ class GeographyAuthorizationTest extends TestCase
             'coordinator'
         );
 
-        $governorate = $this->findGovernorate($tenant->id, 'BEY');
+        $governorate = $this->findGovernorate($tenant->id, 'LB-BA');
 
         $this->assertTrue(
             Gate::forUser($coordinator)->allows(
@@ -101,7 +101,7 @@ class GeographyAuthorizationTest extends TestCase
             'field_agent'
         );
 
-        $governorate = $this->findGovernorate($tenant->id, 'BEY');
+        $governorate = $this->findGovernorate($tenant->id, 'LB-BA');
 
         $this->assertTrue(
             Gate::forUser($fieldAgent)->allows(
@@ -136,7 +136,7 @@ class GeographyAuthorizationTest extends TestCase
 
         $otherGovernorate = $this->findGovernorate(
             $otherTenant->id,
-            'BEY'
+            'LB-BA'
         );
 
         $this->assertFalse(

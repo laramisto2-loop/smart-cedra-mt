@@ -40,14 +40,14 @@ class GeographyIsolationTest extends TestCase
             'governorate_id' => $governorate->id,
             'name_en' => 'Beirut',
             'name_ar' => 'بيروت',
-            'code' => 'BEY-D',
+            'code' => 'LB-BA-BEIRUT',
         ]);
 
         $area = Area::create([
             'district_id' => $district->id,
             'name_en' => 'Achrafieh',
             'name_ar' => 'الأشرفية',
-            'code' => 'ACH',
+            'code' => 'LB-BA-BEIRUT-ACHRAFIEH',
             'type' => 'neighbourhood',
         ]);
 
@@ -55,7 +55,7 @@ class GeographyIsolationTest extends TestCase
             'area_id' => $area->id,
             'name_en' => 'Achrafieh Public School',
             'name_ar' => 'مدرسة الأشرفية الرسمية',
-            'code' => 'ACH-PC-01',
+            'code' => 'LB-BA-BEIRUT-ACHRAFIEH-PUBLIC-SCHOOL',
         ]);
 
         $pollingStation = PollingStation::create([
