@@ -3,6 +3,7 @@ import AreasPage from './AreasPage.jsx'
 import DistrictsPage from './DistrictsPage.jsx'
 import GovernoratesPage from './GovernoratesPage.jsx'
 import PollingCentersPage from './PollingCentersPage.jsx'
+import PollingStationsPage from './PollingStationsPage.jsx'
 
 const geographyTabs = [
   {
@@ -28,7 +29,7 @@ const geographyTabs = [
   {
     id: 'polling-stations',
     label: 'Polling stations',
-    enabled: false,
+    enabled: true,
   },
 ]
 
@@ -74,6 +75,9 @@ function GeographyPage({ user }) {
       {activeTab === 'areas' && <AreasPage user={user} />}
       {activeTab === 'polling-centers' && (
         <PollingCentersPage user={user} />
+      )}
+      {activeTab === 'polling-stations' && (
+        <PollingStationsPage user={user} />
       )}
     </div>
   )
