@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import AreasPage from './AreasPage.jsx'
 import DistrictsPage from './DistrictsPage.jsx'
 import GovernoratesPage from './GovernoratesPage.jsx'
 
@@ -16,7 +17,7 @@ const geographyTabs = [
   {
     id: 'areas',
     label: 'Areas',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'polling-centers',
@@ -68,6 +69,8 @@ function GeographyPage({ user }) {
       {activeTab === 'districts' && (
         <DistrictsPage user={user} />
       )}
+
+      {activeTab === 'areas' && <AreasPage user={user} />}
     </div>
   )
 }

@@ -75,7 +75,7 @@ class AreaApiTest extends TestCase
             $cedraTenant,
             $firstDistrict,
             'Achrafieh',
-            'ACH'
+            'LB-BA-BEIRUT-ACHRAFIEH'
         );
 
         $this->createArea(
@@ -106,7 +106,7 @@ class AreaApiTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment([
-                'code' => 'ACH',
+                'code' => 'LB-BA-BEIRUT-ACHRAFIEH',
             ])
             ->assertJsonMissing([
                 'code' => 'SEC-A',
@@ -135,7 +135,7 @@ class AreaApiTest extends TestCase
                 'district_id' => $district->id,
                 'name_en' => 'Achrafieh',
                 'name_ar' => 'الأشرفية',
-                'code' => 'ACH',
+                'code' => 'LB-BA-BEIRUT-ACHRAFIEH',
                 'type' => 'neighbourhood',
                 'latitude' => 33.8938,
                 'longitude' => 35.5018,
@@ -143,7 +143,7 @@ class AreaApiTest extends TestCase
 
         $createResponse
             ->assertCreated()
-            ->assertJsonPath('data.code', 'ACH')
+            ->assertJsonPath('data.code', 'LB-BA-BEIRUT-ACHRAFIEH')
             ->assertJsonPath('data.type', 'neighbourhood')
             ->assertJsonPath('data.district.id', $district->id);
 
@@ -153,13 +153,13 @@ class AreaApiTest extends TestCase
             'id' => $areaId,
             'tenant_id' => $tenant->id,
             'district_id' => $district->id,
-            'code' => 'ACH',
+            'code' => 'LB-BA-BEIRUT-ACHRAFIEH',
             'type' => 'neighbourhood',
         ]);
 
         $this->getJson("/api/areas/{$areaId}")
             ->assertOk()
-            ->assertJsonPath('data.code', 'ACH');
+            ->assertJsonPath('data.code', 'LB-BA-BEIRUT-ACHRAFIEH');
 
         $this->patchJson("/api/areas/{$areaId}", [
             'name_en' => 'Achrafieh Updated',
@@ -300,7 +300,7 @@ class AreaApiTest extends TestCase
             $tenant,
             $district,
             'Achrafieh',
-            'ACH'
+            'LB-BA-BEIRUT-ACHRAFIEH'
         );
 
         $coordinator = $this->createUserWithRole(
@@ -353,7 +353,7 @@ class AreaApiTest extends TestCase
             $tenant,
             $district,
             'Achrafieh',
-            'ACH'
+            'LB-BA-BEIRUT-ACHRAFIEH'
         );
 
         $fieldAgent = $this->createUserWithRole(

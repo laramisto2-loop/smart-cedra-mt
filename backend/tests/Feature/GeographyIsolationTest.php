@@ -47,7 +47,7 @@ class GeographyIsolationTest extends TestCase
             'district_id' => $district->id,
             'name_en' => 'Achrafieh',
             'name_ar' => 'الأشرفية',
-            'code' => 'ACH',
+            'code' => 'LB-BA-BEIRUT-ACHRAFIEH',
             'type' => 'neighbourhood',
         ]);
 

@@ -47,7 +47,7 @@ class GeographySeeder extends Seeder
         $area = Area::withoutGlobalScopes()->updateOrCreate(
             [
                 'tenant_id' => $tenant->id,
-                'code' => 'ACH',
+                'code' => 'LB-BA-BEIRUT-ACHRAFIEH',
             ],
             [
                 'district_id' => $district->id,
