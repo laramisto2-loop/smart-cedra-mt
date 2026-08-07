@@ -811,6 +811,7 @@
   background: #e4f4fb;
   color: #1478a5;
   font-size: 11px;
+  white-space: nowrap;
   font-weight: 800;
 }
 

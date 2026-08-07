@@ -55,7 +55,7 @@ class GeographyIsolationTest extends TestCase
             'area_id' => $area->id,
             'name_en' => 'Achrafieh Public School',
             'name_ar' => 'مدرسة الأشرفية الرسمية',
-            'code' => 'ACH-PC-01',
+            'code' => 'LB-BA-BEIRUT-ACHRAFIEH-PUBLIC-SCHOOL',
         ]);
 
         $pollingStation = PollingStation::create([

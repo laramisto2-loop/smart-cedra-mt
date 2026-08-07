@@ -60,7 +60,7 @@ class GeographySeeder extends Seeder
         $pollingCenter = PollingCenter::withoutGlobalScopes()->updateOrCreate(
             [
                 'tenant_id' => $tenant->id,
-                'code' => 'ACH-PC-01',
+                'code' => 'LB-BA-BEIRUT-ACHRAFIEH-PUBLIC-SCHOOL',
             ],
             [
                 'area_id' => $area->id,
