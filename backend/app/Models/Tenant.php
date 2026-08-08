@@ -52,6 +52,16 @@ class Tenant extends Model
         return $this->hasMany(PollingStation::class);
     }
 
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class);
+    }
+
+    public function contactConsents(): HasMany
+    {
+        return $this->hasMany(ContactConsent::class);
+    }
+
     public function settings(): HasOne
     {
         return $this->hasOne(TenantSetting::class);

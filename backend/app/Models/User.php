@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -60,6 +61,22 @@ class User extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    public function createdContacts(): HasMany
+    {
+        return $this->hasMany(
+            Contact::class,
+            'created_by_user_id'
+        );
+    }
+
+    public function recordedContactConsents(): HasMany
+    {
+        return $this->hasMany(
+            ContactConsent::class,
+            'recorded_by_user_id'
+        );
     }
 
     public function assignRole(Role $role): void

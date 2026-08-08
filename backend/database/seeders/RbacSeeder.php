@@ -40,6 +40,34 @@ class RbacSeeder extends Seeder
                 'name' => 'View audit logs',
                 'description' => 'View tenant audit-log records.',
             ],
+            'contacts.view' => [
+                'name' => 'View contacts',
+                'description' => 'View tenant CRM contacts and their consent status.',
+            ],
+            'contacts.create' => [
+                'name' => 'Create contacts',
+                'description' => 'Create contacts inside the active tenant.',
+            ],
+            'contacts.update' => [
+                'name' => 'Update contacts',
+                'description' => 'Update tenant contacts and their operational details.',
+            ],
+            'contacts.delete' => [
+                'name' => 'Delete contacts',
+                'description' => 'Delete contacts belonging to the active tenant.',
+            ],
+            'contacts.consent.manage' => [
+                'name' => 'Manage contact consent',
+                'description' => 'Record consent and opt-out status for contact channels.',
+            ],
+            'contacts.import' => [
+                'name' => 'Import contacts',
+                'description' => 'Bulk import tenant contacts from validated files.',
+            ],
+            'contacts.export' => [
+                'name' => 'Export contacts',
+                'description' => 'Export tenant contact data.',
+            ],
         ];
 
         $permissions = collect($permissionDefinitions)
@@ -68,6 +96,10 @@ class RbacSeeder extends Seeder
                     'geography.view',
                     'geography.create',
                     'geography.update',
+                    'contacts.view',
+                    'contacts.create',
+                    'contacts.update',
+                    'contacts.consent.manage',
                 ],
             ],
             'field_agent' => [

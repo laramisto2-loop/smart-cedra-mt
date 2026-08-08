@@ -43,6 +43,11 @@ class Area extends Model
         return $this->belongsTo(District::class);
     }
 
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class);
+    }
+
     public function pollingCenters(): HasMany
     {
         return $this->hasMany(PollingCenter::class);
