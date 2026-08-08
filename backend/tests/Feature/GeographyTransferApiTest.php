@@ -12,6 +12,7 @@ use App\Models\User;
 use Database\Seeders\RbacSeeder;
 use Database\Seeders\TenantSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Testing\TestResponse;
 use RuntimeException;
 use Tests\TestCase;
@@ -289,6 +290,197 @@ class GeographyTransferApiTest extends TestCase
         $this->get(
             '/api/geography/transfers/unknown/export'
         )->assertNotFound();
+    }
+
+    public function test_unauthenticated_user_cannot_preview_geography_import(): void
+    {
+        $file = $this->csvFile(
+            'governorates.csv',
+            "code,name_en,name_ar\nNEW,New,جديد"
+        );
+
+        $this->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/governorates/preview',
+                ['file' => $file]
+            )
+            ->assertUnauthorized();
+    }
+
+    public function test_user_without_geography_permission_cannot_preview_import(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+
+        $user = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $file = $this->csvFile(
+            'governorates.csv',
+            "code,name_en,name_ar\nNEW,New,جديد"
+        );
+
+        $this->actingAs($user)
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/governorates/preview',
+                ['file' => $file]
+            )
+            ->assertForbidden();
+    }
+
+    public function test_preview_classifies_creates_and_updates_without_writing(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+
+        $this->createHierarchy($tenant, 'CED');
+
+        $file = $this->csvFile(
+            'governorates.csv',
+            implode("\n", [
+                'code,name_en,name_ar',
+                'CED-GOV,Updated Governorate,Updated Arabic',
+                'NEW-GOV,New Governorate,New Arabic',
+            ])
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/governorates/preview',
+                ['file' => $file]
+            )
+            ->assertOk()
+            ->assertJsonPath('data.type', 'governorates')
+            ->assertJsonPath('data.summary.total', 2)
+            ->assertJsonPath('data.summary.create', 1)
+            ->assertJsonPath('data.summary.update', 1)
+            ->assertJsonPath('data.summary.invalid', 0)
+            ->assertJsonPath('data.rows.0.status', 'update')
+            ->assertJsonPath('data.rows.1.status', 'create');
+
+        $this->assertDatabaseHas('governorates', [
+            'tenant_id' => $tenant->id,
+            'code' => 'CED-GOV',
+            'name_en' => 'CED Governorate',
+        ]);
+
+        $this->assertDatabaseMissing('governorates', [
+            'tenant_id' => $tenant->id,
+            'code' => 'NEW-GOV',
+        ]);
+    }
+
+    public function test_preview_rejects_invalid_parents_values_and_duplicates(): void
+    {
+        $cedraTenant = $this->findTenant('cedra-campaign');
+        $futureTenant = $this->findTenant('lebanon-future');
+
+        $this->createHierarchy($cedraTenant, 'CED');
+        $this->createHierarchy($futureTenant, 'FUT');
+
+        $file = $this->csvFile(
+            'areas.csv',
+            implode("\n", [
+                'district_code,code,name_en,name_ar,type,latitude,longitude',
+                'CED-DIST,CED-NEW-AREA,New Area,New Arabic,city,33.8,35.5',
+                'FUT-DIST,CED-FOREIGN-AREA,Foreign Area,Foreign Arabic,invalid,91,181',
+                'CED-DIST,CED-NEW-AREA,Duplicate Area,Duplicate Arabic,town,,',
+            ])
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/areas/preview',
+                ['file' => $file]
+            )
+            ->assertOk()
+            ->assertJsonPath('data.summary.total', 3)
+            ->assertJsonPath('data.summary.create', 1)
+            ->assertJsonPath('data.summary.update', 0)
+            ->assertJsonPath('data.summary.invalid', 2)
+            ->assertJsonPath(
+                'data.rows.1.status',
+                'invalid'
+            )
+            ->assertJsonPath(
+                'data.rows.2.status',
+                'invalid'
+            )
+            ->assertJsonStructure([
+                'data' => [
+                    'rows' => [
+                        1 => [
+                            'errors' => [
+                                'district_code',
+                                'type',
+                                'latitude',
+                                'longitude',
+                            ],
+                        ],
+                        2 => [
+                            'errors' => [
+                                '_row',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $this->assertDatabaseMissing('areas', [
+            'tenant_id' => $cedraTenant->id,
+            'code' => 'CED-NEW-AREA',
+        ]);
+
+        $this->assertDatabaseMissing('areas', [
+            'tenant_id' => $cedraTenant->id,
+            'code' => 'CED-FOREIGN-AREA',
+        ]);
+    }
+
+    public function test_preview_rejects_incorrect_csv_headers(): void
+    {
+        $file = $this->csvFile(
+            'governorates.csv',
+            "name_en,code,name_ar\nNew,NEW,جديد"
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/governorates/preview',
+                ['file' => $file]
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('file');
+    }
+
+    public function test_preview_requires_a_csv_file(): void
+    {
+        $file = $this->csvFile(
+            'governorates.txt',
+            "code,name_en,name_ar\nNEW,New,جديد"
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/governorates/preview',
+                ['file' => $file]
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('file');
+    }
+
+    private function csvFile(
+        string $name,
+        string $contents
+    ): UploadedFile {
+        return UploadedFile::fake()->createWithContent(
+            $name,
+            $contents
+        );
     }
 
     private function cedraAdmin(): User

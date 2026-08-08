@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PreviewGeographyImportRequest;
 use App\Models\Governorate;
 use App\Services\GeographyCsvService;
+use App\Services\GeographyImportService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -35,6 +39,25 @@ class GeographyTransferController extends Controller
             type: $type,
             template: false
         );
+    }
+
+    public function preview(
+        PreviewGeographyImportRequest $request,
+        GeographyCsvService $csvService,
+        GeographyImportService $importService,
+        string $type
+    ): JsonResponse {
+        abort_unless($csvService->supports($type), 404);
+
+        /** @var UploadedFile $file */
+        $file = $request->file('file');
+
+        return response()->json([
+            'data' => $importService->preview(
+                $file,
+                $type
+            ),
+        ]);
     }
 
     private function authorizeDownload(
