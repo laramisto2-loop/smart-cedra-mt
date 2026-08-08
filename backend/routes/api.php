@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\DistrictController;
+use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
@@ -17,6 +18,26 @@ Route::middleware([
         'user',
         [AuthenticatedSessionController::class, 'show']
     )->name('user.show');
+
+    Route::get(
+        'geography/transfers/{type}/template',
+        [GeographyTransferController::class, 'template']
+    )->name('geography.transfers.template');
+
+    Route::get(
+        'geography/transfers/{type}/export',
+        [GeographyTransferController::class, 'export']
+    )->name('geography.transfers.export');
+
+    Route::post(
+        'geography/transfers/{type}/preview',
+        [GeographyTransferController::class, 'preview']
+    )->name('geography.transfers.preview');
+
+    Route::post(
+        'geography/transfers/{type}/import',
+        [GeographyTransferController::class, 'import']
+    )->name('geography.transfers.import');
 
     Route::apiResource('governorates', GovernorateController::class);
     Route::apiResource('districts', DistrictController::class);

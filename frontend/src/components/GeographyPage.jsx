@@ -4,6 +4,7 @@ import DistrictsPage from './DistrictsPage.jsx'
 import GovernoratesPage from './GovernoratesPage.jsx'
 import PollingCentersPage from './PollingCentersPage.jsx'
 import PollingStationsPage from './PollingStationsPage.jsx'
+import GeographyTransferPage from './GeographyTransferPage.jsx'
 
 const geographyTabs = [
   {
@@ -29,6 +30,11 @@ const geographyTabs = [
   {
     id: 'polling-stations',
     label: 'Polling stations',
+    enabled: true,
+  },
+    {
+    id: 'data-transfer',
+    label: 'Data transfer',
     enabled: true,
   },
 ]
@@ -78,6 +84,9 @@ function GeographyPage({ user }) {
       )}
       {activeTab === 'polling-stations' && (
         <PollingStationsPage user={user} />
+      )}
+      {activeTab === 'data-transfer' && (
+        <GeographyTransferPage user={user} />
       )}
     </div>
   )
