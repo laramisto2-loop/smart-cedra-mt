@@ -1513,3 +1513,159 @@
     align-self: flex-start;
   }
 }
+
+.contacts-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contacts-filter-card {
+  padding: 20px;
+}
+
+.contacts-search {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.contacts-search .form-field,
+.contacts-filters .form-field {
+  margin-bottom: 0;
+}
+
+.contacts-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.contacts-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.contacts-table {
+  min-width: 1050px;
+}
+
+.contacts-table td {
+  vertical-align: top;
+}
+
+.table-secondary {
+  display: block;
+  margin-top: 4px;
+  color: #718399;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.status-pill,
+.consent-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-pill {
+  padding: 5px 9px;
+}
+
+.status-pill.active {
+  background: #d9f7eb;
+  color: #087a57;
+}
+
+.status-pill.inactive {
+  background: #fff0d7;
+  color: #986000;
+}
+
+.status-pill.archived {
+  background: #edf1f5;
+  color: #5d6d7e;
+}
+
+.consent-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.consent-pill {
+  padding: 4px 8px;
+  background: #edf1f5;
+  color: #5d6d7e;
+  white-space: nowrap;
+}
+
+.consent-pill.granted {
+  background: #d9f7eb;
+  color: #087a57;
+}
+
+.consent-pill.denied,
+.consent-pill.revoked {
+  background: #ffe3e3;
+  color: #af3030;
+}
+
+.consent-pill.unknown {
+  background: #edf1f5;
+  color: #68798d;
+}
+
+.form-field textarea {
+  width: 100%;
+  padding: 12px 13px;
+  resize: vertical;
+  border: 1px solid #cad7e4;
+  border-radius: 9px;
+  outline: none;
+  background: #ffffff;
+  color: #18314f;
+  font: inherit;
+  font-size: 13px;
+}
+
+.form-field textarea:focus {
+  border-color: #28a9e2;
+  box-shadow: 0 0 0 3px rgb(40 169 226 / 14%);
+}
+
+.consent-notice,
+.consent-history-note {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.consent-notice {
+  border: 1px solid #b9e2f4;
+  background: #eefaff;
+  color: #235875;
+}
+
+.consent-history-note {
+  border: 1px solid #dce5ef;
+  background: #f6f9fc;
+  color: #536a82;
+}
+
+@media (max-width: 900px) {
+  .contacts-search,
+  .contacts-filters {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import GeographyPage from './GeographyPage.jsx'
+import ContactsPage from './ContactsPage.jsx'
 import '../App.css'
 
 const navigationItems = [
@@ -77,13 +78,14 @@ function Dashboard({ user, onLogout }) {
                 activePage === item.label ? 'active' : ''
               }`}
               onClick={() => {
-              if (
-                  item.label === 'Dashboard' ||
-                  item.label === 'Geography'
-                  ) {
-                      setActivePage(item.label)
-                    }
-                }}
+                if (
+                  ['Dashboard', 'Geography', 'Contacts'].includes(
+                  item.label,
+                  )
+                ) {
+                    setActivePage(item.label)
+                  }
+              }}
             >
               <span className="navigation-icon" aria-hidden="true">
                 {item.icon}
@@ -124,10 +126,16 @@ function Dashboard({ user, onLogout }) {
           </div>
         </header>
 
-        {activePage === 'Geography' ? (
-                 <GeographyPage user={user} />
-        ) : (
-         <>
+        {activePage === 'Geography' && (
+            <GeographyPage user={user} />
+        )}
+
+        {activePage === 'Contacts' && (
+            <ContactsPage user={user} />
+    )}
+
+{activePage === 'Dashboard' && (
+  <>
 
         <section className="welcome-panel">
           <div>
