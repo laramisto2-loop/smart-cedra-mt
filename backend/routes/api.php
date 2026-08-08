@@ -34,6 +34,11 @@ Route::middleware([
         [GeographyTransferController::class, 'preview']
     )->name('geography.transfers.preview');
 
+    Route::post(
+        'geography/transfers/{type}/import',
+        [GeographyTransferController::class, 'import']
+    )->name('geography.transfers.import');
+
     Route::apiResource('governorates', GovernorateController::class);
     Route::apiResource('districts', DistrictController::class);
     Route::apiResource('areas', AreaController::class);

@@ -8,6 +8,7 @@ use App\Models\Governorate;
 use App\Models\PollingCenter;
 use App\Models\PollingStation;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -169,6 +170,67 @@ class GeographyImportService
                 $summary['total'] > count($previewRows)
             ),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function import(
+        UploadedFile $file,
+        string $type
+    ): array {
+        return DB::transaction(function () use (
+            $file,
+            $type
+        ): array {
+            $preview = $this->preview($file, $type);
+
+            if ($preview['summary']['invalid'] > 0) {
+                throw ValidationException::withMessages([
+                    'file' => [
+                        'The import was cancelled because the CSV contains invalid rows.',
+                    ],
+                ]);
+            }
+
+            $csv = $this->openFile($file);
+            $headers = $this->readHeaders($csv);
+            $created = 0;
+            $updated = 0;
+
+            while (! $csv->eof()) {
+                $record = $csv->fgetcsv();
+
+                if (
+                    $record === false
+                    || $this->isBlankRow($record)
+                ) {
+                    continue;
+                }
+
+                [$data] = $this->mapRecord(
+                    $headers,
+                    $record,
+                    $type
+                );
+
+                if ($this->persistRow($data, $type)) {
+                    $created++;
+                } else {
+                    $updated++;
+                }
+            }
+
+            return [
+                'type' => $type,
+                'filename' => $file->getClientOriginalName(),
+                'summary' => [
+                    'total' => $created + $updated,
+                    'created' => $created,
+                    'updated' => $updated,
+                ],
+            ];
+        });
     }
 
     private function openFile(
@@ -514,6 +576,172 @@ class GeographyImportService
             $model::query()
                 ->where('code', $data['code'])
                 ->exists();
+    }
+
+    /**
+     * @param  array<string, string|null>  $data
+     */
+    private function persistRow(
+        array $data,
+        string $type
+    ): bool {
+        return match ($type) {
+            'governorates' => $this->persistGovernorate($data),
+            'districts' => $this->persistDistrict($data),
+            'areas' => $this->persistArea($data),
+            'polling-centers' => $this->persistPollingCenter(
+                $data
+            ),
+            'polling-stations' => $this->persistPollingStation(
+                $data
+            ),
+            default => throw new InvalidArgumentException(
+                'Unsupported geography CSV type.'
+            ),
+        };
+    }
+
+    /**
+     * @param  array<string, string|null>  $data
+     */
+    private function persistGovernorate(array $data): bool
+    {
+        $model = Governorate::query()->firstOrNew([
+            'code' => $data['code'],
+        ]);
+
+        $created = ! $model->exists;
+
+        $model->fill([
+            'code' => $data['code'],
+            'name_en' => $data['name_en'],
+            'name_ar' => $data['name_ar'],
+        ])->save();
+
+        return $created;
+    }
+
+    /**
+     * @param  array<string, string|null>  $data
+     */
+    private function persistDistrict(array $data): bool
+    {
+        $model = District::query()->firstOrNew([
+            'code' => $data['code'],
+        ]);
+
+        $created = ! $model->exists;
+
+        $model->fill([
+            'governorate_id' => $this->requiredParentId(
+                'districts',
+                $data['governorate_code']
+            ),
+            'code' => $data['code'],
+            'name_en' => $data['name_en'],
+            'name_ar' => $data['name_ar'],
+        ])->save();
+
+        return $created;
+    }
+
+    /**
+     * @param  array<string, string|null>  $data
+     */
+    private function persistArea(array $data): bool
+    {
+        $model = Area::query()->firstOrNew([
+            'code' => $data['code'],
+        ]);
+
+        $created = ! $model->exists;
+
+        $model->fill([
+            'district_id' => $this->requiredParentId(
+                'areas',
+                $data['district_code']
+            ),
+            'code' => $data['code'],
+            'name_en' => $data['name_en'],
+            'name_ar' => $data['name_ar'],
+            'type' => $data['type'],
+            'latitude' => $data['latitude'],
+            'longitude' => $data['longitude'],
+        ])->save();
+
+        return $created;
+    }
+
+    /**
+     * @param  array<string, string|null>  $data
+     */
+    private function persistPollingCenter(array $data): bool
+    {
+        $model = PollingCenter::query()->firstOrNew([
+            'code' => $data['code'],
+        ]);
+
+        $created = ! $model->exists;
+
+        $model->fill([
+            'area_id' => $this->requiredParentId(
+                'polling-centers',
+                $data['area_code']
+            ),
+            'code' => $data['code'],
+            'name_en' => $data['name_en'],
+            'name_ar' => $data['name_ar'],
+            'address_en' => $data['address_en'],
+            'address_ar' => $data['address_ar'],
+            'latitude' => $data['latitude'],
+            'longitude' => $data['longitude'],
+        ])->save();
+
+        return $created;
+    }
+
+    /**
+     * @param  array<string, string|null>  $data
+     */
+    private function persistPollingStation(array $data): bool
+    {
+        $parentId = $this->requiredParentId(
+            'polling-stations',
+            $data['polling_center_code']
+        );
+
+        $model = PollingStation::query()->firstOrNew([
+            'polling_center_id' => $parentId,
+            'station_number' => $data['station_number'],
+        ]);
+
+        $created = ! $model->exists;
+
+        $model->fill([
+            'polling_center_id' => $parentId,
+            'station_number' => $data['station_number'],
+            'name_en' => $data['name_en'],
+            'name_ar' => $data['name_ar'],
+            'room' => $data['room'],
+            'registered_voters' => $data['registered_voters'],
+        ])->save();
+
+        return $created;
+    }
+
+    private function requiredParentId(
+        string $type,
+        string $code
+    ): int {
+        $parentId = $this->parentId($type, $code);
+
+        if ($parentId === null) {
+            throw new InvalidArgumentException(
+                'The validated geography parent could not be resolved.'
+            );
+        }
+
+        return $parentId;
     }
 
     private function parentColumn(

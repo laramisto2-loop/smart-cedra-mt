@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ImportGeographyRequest;
 use App\Http\Requests\PreviewGeographyImportRequest;
 use App\Models\Governorate;
 use App\Services\GeographyCsvService;
@@ -67,6 +68,25 @@ class GeographyTransferController extends Controller
         abort_unless($csvService->supports($type), 404);
 
         Gate::authorize('viewAny', Governorate::class);
+    }
+
+    public function import(
+        ImportGeographyRequest $request,
+        GeographyCsvService $csvService,
+        GeographyImportService $importService,
+        string $type
+    ): JsonResponse {
+        abort_unless($csvService->supports($type), 404);
+
+        /** @var UploadedFile $file */
+        $file = $request->file('file');
+
+        return response()->json([
+            'data' => $importService->import(
+                $file,
+                $type
+            ),
+        ]);
     }
 
     private function download(

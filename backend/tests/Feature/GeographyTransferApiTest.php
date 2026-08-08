@@ -473,6 +473,233 @@ class GeographyTransferApiTest extends TestCase
             ->assertJsonValidationErrors('file');
     }
 
+    public function test_unauthenticated_user_cannot_confirm_geography_import(): void
+    {
+        $file = $this->csvFile(
+            'governorates.csv',
+            "code,name_en,name_ar\nNEW-GOV,New Governorate,New Arabic"
+        );
+
+        $this->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/governorates/import',
+                [
+                    'file' => $file,
+                    'confirmed' => true,
+                ]
+            )
+            ->assertUnauthorized();
+    }
+
+    public function test_user_without_geography_permission_cannot_confirm_import(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+
+        $user = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $file = $this->csvFile(
+            'governorates.csv',
+            "code,name_en,name_ar\nNEW-GOV,New Governorate,New Arabic"
+        );
+
+        $this->actingAs($user)
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/governorates/import',
+                [
+                    'file' => $file,
+                    'confirmed' => true,
+                ]
+            )
+            ->assertForbidden();
+    }
+
+    public function test_import_requires_explicit_confirmation(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+
+        $file = $this->csvFile(
+            'governorates.csv',
+            "code,name_en,name_ar\nUNCONFIRMED,Unconfirmed,Unconfirmed Arabic"
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/governorates/import',
+                ['file' => $file]
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('confirmed');
+
+        $this->assertDatabaseMissing('governorates', [
+            'tenant_id' => $tenant->id,
+            'code' => 'UNCONFIRMED',
+        ]);
+    }
+
+    public function test_confirmed_import_creates_and_updates_every_geography_level(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $hierarchy = $this->createHierarchy($tenant, 'IMP');
+
+        $this->importCsv(
+            'governorates',
+            implode("\n", [
+                'code,name_en,name_ar',
+                'IMP-GOV,Updated Governorate,Updated Governorate Arabic',
+                'IMP-GOV-NEW,New Governorate,New Governorate Arabic',
+            ])
+        )
+            ->assertOk()
+            ->assertJsonPath('data.summary.total', 2)
+            ->assertJsonPath('data.summary.created', 1)
+            ->assertJsonPath('data.summary.updated', 1);
+
+        $this->importCsv(
+            'districts',
+            implode("\n", [
+                'governorate_code,code,name_en,name_ar',
+                'IMP-GOV,IMP-DIST,Updated District,Updated District Arabic',
+                'IMP-GOV,IMP-DIST-NEW,New District,New District Arabic',
+            ])
+        )
+            ->assertOk()
+            ->assertJsonPath('data.summary.created', 1)
+            ->assertJsonPath('data.summary.updated', 1);
+
+        $this->importCsv(
+            'areas',
+            implode("\n", [
+                'district_code,code,name_en,name_ar,type,latitude,longitude',
+                'IMP-DIST,IMP-AREA,Updated Area,Updated Area Arabic,town,33.9,35.5',
+                'IMP-DIST,IMP-AREA-NEW,New Area,New Area Arabic,village,,',
+            ])
+        )
+            ->assertOk()
+            ->assertJsonPath('data.summary.created', 1)
+            ->assertJsonPath('data.summary.updated', 1);
+
+        $this->importCsv(
+            'polling-centers',
+            implode("\n", [
+                'area_code,code,name_en,name_ar,address_en,address_ar,latitude,longitude',
+                'IMP-AREA,IMP-CENTER,Updated Center,Updated Center Arabic,Updated Address,Updated Arabic Address,33.9,35.5',
+                'IMP-AREA,IMP-CENTER-NEW,New Center,New Center Arabic,New Address,New Arabic Address,,',
+            ])
+        )
+            ->assertOk()
+            ->assertJsonPath('data.summary.created', 1)
+            ->assertJsonPath('data.summary.updated', 1);
+
+        $this->importCsv(
+            'polling-stations',
+            implode("\n", [
+                'polling_center_code,station_number,name_en,name_ar,room,registered_voters',
+                'IMP-CENTER,7,Updated Station,Updated Station Arabic,Updated Room,750',
+                'IMP-CENTER,8,New Station,New Station Arabic,Room 8,800',
+            ])
+        )
+            ->assertOk()
+            ->assertJsonPath('data.summary.created', 1)
+            ->assertJsonPath('data.summary.updated', 1);
+
+        $this->assertDatabaseHas('governorates', [
+            'tenant_id' => $tenant->id,
+            'code' => 'IMP-GOV',
+            'name_en' => 'Updated Governorate',
+        ]);
+
+        $this->assertDatabaseHas('governorates', [
+            'tenant_id' => $tenant->id,
+            'code' => 'IMP-GOV-NEW',
+        ]);
+
+        $this->assertDatabaseHas('districts', [
+            'tenant_id' => $tenant->id,
+            'code' => 'IMP-DIST-NEW',
+            'governorate_id' => $hierarchy['governorate']->id,
+        ]);
+
+        $this->assertDatabaseHas('areas', [
+            'tenant_id' => $tenant->id,
+            'code' => 'IMP-AREA',
+            'type' => 'town',
+        ]);
+
+        $this->assertDatabaseHas('areas', [
+            'tenant_id' => $tenant->id,
+            'code' => 'IMP-AREA-NEW',
+            'district_id' => $hierarchy['district']->id,
+        ]);
+
+        $this->assertDatabaseHas('polling_centers', [
+            'tenant_id' => $tenant->id,
+            'code' => 'IMP-CENTER',
+            'address_en' => 'Updated Address',
+        ]);
+
+        $this->assertDatabaseHas('polling_centers', [
+            'tenant_id' => $tenant->id,
+            'code' => 'IMP-CENTER-NEW',
+            'area_id' => $hierarchy['area']->id,
+        ]);
+
+        $this->assertDatabaseHas('polling_stations', [
+            'tenant_id' => $tenant->id,
+            'polling_center_id' => $hierarchy['pollingCenter']->id,
+            'station_number' => '7',
+            'room' => 'Updated Room',
+            'registered_voters' => 750,
+        ]);
+
+        $this->assertDatabaseHas('polling_stations', [
+            'tenant_id' => $tenant->id,
+            'polling_center_id' => $hierarchy['pollingCenter']->id,
+            'station_number' => '8',
+            'room' => 'Room 8',
+            'registered_voters' => 800,
+        ]);
+    }
+
+    public function test_invalid_import_is_rejected_without_writing_any_rows(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+
+        $file = $this->csvFile(
+            'governorates.csv',
+            implode("\n", [
+                'code,name_en,name_ar',
+                'ATOMIC-GOOD,Valid Governorate,Valid Arabic',
+                'ATOMIC-BAD,,Missing English Name',
+            ])
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/geography/transfers/governorates/import',
+                [
+                    'file' => $file,
+                    'confirmed' => true,
+                ]
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('file');
+
+        $this->assertDatabaseMissing('governorates', [
+            'tenant_id' => $tenant->id,
+            'code' => 'ATOMIC-GOOD',
+        ]);
+
+        $this->assertDatabaseMissing('governorates', [
+            'tenant_id' => $tenant->id,
+            'code' => 'ATOMIC-BAD',
+        ]);
+    }
+
     private function csvFile(
         string $name,
         string $contents
@@ -481,6 +708,24 @@ class GeographyTransferApiTest extends TestCase
             $name,
             $contents
         );
+    }
+
+    private function importCsv(
+        string $type,
+        string $contents
+    ): TestResponse {
+        return $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                "/api/geography/transfers/{$type}/import",
+                [
+                    'file' => $this->csvFile(
+                        "{$type}.csv",
+                        $contents
+                    ),
+                    'confirmed' => true,
+                ]
+            );
     }
 
     private function cedraAdmin(): User
