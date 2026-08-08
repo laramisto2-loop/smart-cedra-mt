@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\DistrictController;
 use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
@@ -38,6 +39,16 @@ Route::middleware([
         'geography/transfers/{type}/import',
         [GeographyTransferController::class, 'import']
     )->name('geography.transfers.import');
+
+    Route::post(
+        'contacts/{contact}/consents',
+        [ContactController::class, 'recordConsent']
+    )->name('contacts.consents.record');
+
+    Route::apiResource(
+        'contacts',
+        ContactController::class
+    );
 
     Route::apiResource('governorates', GovernorateController::class);
     Route::apiResource('districts', DistrictController::class);
