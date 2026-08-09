@@ -87,6 +87,11 @@ class Contact extends Model
         return $this->hasMany(ContactConsent::class);
     }
 
+    public function interactions(): HasMany
+    {
+        return $this->hasMany(ContactInteraction::class);
+    }
+
     public function segments(): BelongsToMany
     {
         return $this->belongsToMany(Segment::class)

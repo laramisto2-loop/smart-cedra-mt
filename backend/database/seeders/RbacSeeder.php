@@ -68,6 +68,22 @@ class RbacSeeder extends Seeder
                 'name' => 'Export contacts',
                 'description' => 'Export tenant contact data.',
             ],
+            'interactions.view' => [
+                'name' => 'View contact interactions',
+                'description' => 'View tenant contact communication timelines.',
+            ],
+            'interactions.create' => [
+                'name' => 'Create contact interactions',
+                'description' => 'Record interactions with tenant contacts.',
+            ],
+            'interactions.update' => [
+                'name' => 'Update contact interactions',
+                'description' => 'Correct tenant contact interaction details.',
+            ],
+            'interactions.delete' => [
+                'name' => 'Delete contact interactions',
+                'description' => 'Delete tenant contact interaction records.',
+            ],
             'segments.view' => [
                 'name' => 'View segments',
                 'description' => 'View tenant contact segments and their memberships.',
@@ -120,10 +136,14 @@ class RbacSeeder extends Seeder
                     'contacts.create',
                     'contacts.update',
                     'contacts.consent.manage',
+                    'interactions.view',
+                    'interactions.create',
+                    'interactions.update',
                     'segments.view',
                     'segments.create',
                     'segments.update',
                     'segments.members.manage',
+
                 ],
             ],
             'field_agent' => [

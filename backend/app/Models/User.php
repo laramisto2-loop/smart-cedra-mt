@@ -79,6 +79,14 @@ class User extends Authenticatable
         );
     }
 
+    public function recordedContactInteractions(): HasMany
+    {
+        return $this->hasMany(
+            ContactInteraction::class,
+            'recorded_by_user_id'
+        );
+    }
+
     public function createdSegments(): HasMany
     {
         return $this->hasMany(
