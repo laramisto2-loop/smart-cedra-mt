@@ -9,50 +9,54 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
 
-class Contact extends Model
+class Segment extends Model
 {
     use Auditable, BelongsToTenant, HasFactory;
 
+    public const TYPES = [
+        'static',
+        'dynamic',
+    ];
+
+    public const STATUSES = [
+        'active',
+        'archived',
+    ];
+
     protected $fillable = [
         'tenant_id',
-        'area_id',
         'created_by_user_id',
-        'reference_code',
-        'first_name',
-        'last_name',
-        'name_ar',
-        'phone',
-        'email',
-        'address',
-        'preferred_language',
-        'preferred_channel',
+        'code',
+        'name',
+        'description',
+        'type',
+        'criteria',
         'status',
-        'source',
-        'notes',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'criteria' => 'array',
+        ];
+    }
 
     protected static function booted(): void
     {
-        static::saving(function (Contact $contact): void {
+        static::saving(function (Segment $segment): void {
             $tenantId = app(TenantContext::class)->id()
-                ?? $contact->tenant_id;
+                ?? $segment->tenant_id;
 
             if ($tenantId === null) {
                 throw new LogicException(
-                    'A contact must belong to a tenant.'
+                    'A segment must belong to a tenant.'
                 );
             }
 
-            self::ensureAreaBelongsToTenant(
-                $contact->area_id,
-                (int) $tenantId
-            );
-
             self::ensureCreatorBelongsToTenant(
-                $contact->created_by_user_id,
+                $segment->created_by_user_id,
                 (int) $tenantId
             );
         });
@@ -63,11 +67,6 @@ class Contact extends Model
         return $this->belongsTo(Tenant::class);
     }
 
-    public function area(): BelongsTo
-    {
-        return $this->belongsTo(Area::class);
-    }
-
     public function creator(): BelongsTo
     {
         return $this->belongsTo(
@@ -76,14 +75,9 @@ class Contact extends Model
         );
     }
 
-    public function consents(): HasMany
+    public function contacts(): BelongsToMany
     {
-        return $this->hasMany(ContactConsent::class);
-    }
-
-    public function segments(): BelongsToMany
-    {
-        return $this->belongsToMany(Segment::class)
+        return $this->belongsToMany(Contact::class)
             ->using(ContactSegment::class)
             ->as('membership')
             ->withPivot([
@@ -93,25 +87,6 @@ class Contact extends Model
                 'added_at',
             ])
             ->withTimestamps();
-    }
-
-    private static function ensureAreaBelongsToTenant(
-        ?int $areaId,
-        int $tenantId
-    ): void {
-        if ($areaId === null) {
-            return;
-        }
-
-        $areaTenantId = Area::withoutGlobalScopes()
-            ->whereKey($areaId)
-            ->value('tenant_id');
-
-        if ((int) $areaTenantId !== $tenantId) {
-            throw new LogicException(
-                'The contact area must belong to the same tenant.'
-            );
-        }
     }
 
     private static function ensureCreatorBelongsToTenant(
@@ -128,7 +103,7 @@ class Contact extends Model
 
         if ((int) $userTenantId !== $tenantId) {
             throw new LogicException(
-                'The contact creator must belong to the same tenant.'
+                'The segment creator must belong to the same tenant.'
             );
         }
     }

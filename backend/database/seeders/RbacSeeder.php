@@ -68,6 +68,26 @@ class RbacSeeder extends Seeder
                 'name' => 'Export contacts',
                 'description' => 'Export tenant contact data.',
             ],
+            'segments.view' => [
+                'name' => 'View segments',
+                'description' => 'View tenant contact segments and their memberships.',
+            ],
+            'segments.create' => [
+                'name' => 'Create segments',
+                'description' => 'Create contact segments inside the active tenant.',
+            ],
+            'segments.update' => [
+                'name' => 'Update segments',
+                'description' => 'Update tenant contact segment details and criteria.',
+            ],
+            'segments.delete' => [
+                'name' => 'Delete segments',
+                'description' => 'Delete contact segments belonging to the active tenant.',
+            ],
+            'segments.members.manage' => [
+                'name' => 'Manage segment members',
+                'description' => 'Add and remove contacts from static tenant segments.',
+            ],
         ];
 
         $permissions = collect($permissionDefinitions)
@@ -100,6 +120,10 @@ class RbacSeeder extends Seeder
                     'contacts.create',
                     'contacts.update',
                     'contacts.consent.manage',
+                    'segments.view',
+                    'segments.create',
+                    'segments.update',
+                    'segments.members.manage',
                 ],
             ],
             'field_agent' => [

@@ -62,6 +62,16 @@ class Tenant extends Model
         return $this->hasMany(ContactConsent::class);
     }
 
+    public function segments(): HasMany
+    {
+        return $this->hasMany(Segment::class);
+    }
+
+    public function contactSegmentMemberships(): HasMany
+    {
+        return $this->hasMany(ContactSegment::class);
+    }
+
     public function settings(): HasOne
     {
         return $this->hasOne(TenantSetting::class);

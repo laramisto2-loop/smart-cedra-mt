@@ -79,6 +79,22 @@ class User extends Authenticatable
         );
     }
 
+    public function createdSegments(): HasMany
+    {
+        return $this->hasMany(
+            Segment::class,
+            'created_by_user_id'
+        );
+    }
+
+    public function addedSegmentMemberships(): HasMany
+    {
+        return $this->hasMany(
+            ContactSegment::class,
+            'added_by_user_id'
+        );
+    }
+
     public function assignRole(Role $role): void
     {
         if (
