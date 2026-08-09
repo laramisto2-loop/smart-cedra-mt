@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
+use App\Http\Controllers\Api\SegmentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +45,21 @@ Route::middleware([
         'contacts/{contact}/consents',
         [ContactController::class, 'recordConsent']
     )->name('contacts.consents.record');
+
+    Route::get(
+        'segments/{segment}/members',
+        [SegmentController::class, 'members']
+    )->name('segments.members.index');
+
+    Route::put(
+        'segments/{segment}/members',
+        [SegmentController::class, 'syncMembers']
+    )->name('segments.members.sync');
+
+    Route::apiResource(
+        'segments',
+        SegmentController::class
+    );
 
     Route::apiResource(
         'contacts',

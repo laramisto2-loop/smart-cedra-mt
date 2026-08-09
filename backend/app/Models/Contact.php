@@ -16,6 +16,12 @@ class Contact extends Model
 {
     use Auditable, BelongsToTenant, HasFactory;
 
+    public const STATUSES = [
+        'active',
+        'inactive',
+        'archived',
+    ];
+
     protected $fillable = [
         'tenant_id',
         'area_id',
