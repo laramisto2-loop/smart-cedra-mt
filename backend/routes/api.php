@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\ContactInteractionController;
 use App\Http\Controllers\Api\DistrictController;
 use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
@@ -45,6 +46,32 @@ Route::middleware([
         'contacts/{contact}/consents',
         [ContactController::class, 'recordConsent']
     )->name('contacts.consents.record');
+
+    Route::get(
+        'contacts/{contact}/interactions',
+        [ContactInteractionController::class, 'index']
+    )->name('contacts.interactions.index');
+
+    Route::post(
+        'contacts/{contact}/interactions',
+        [ContactInteractionController::class, 'store']
+    )->name('contacts.interactions.store');
+
+    Route::get(
+        'contact-interactions/{contactInteraction}',
+        [ContactInteractionController::class, 'show']
+    )->name('contact-interactions.show');
+
+    Route::match(
+        ['put', 'patch'],
+        'contact-interactions/{contactInteraction}',
+        [ContactInteractionController::class, 'update']
+    )->name('contact-interactions.update');
+
+    Route::delete(
+        'contact-interactions/{contactInteraction}',
+        [ContactInteractionController::class, 'destroy']
+    )->name('contact-interactions.destroy');
 
     Route::get(
         'segments/{segment}/members',
