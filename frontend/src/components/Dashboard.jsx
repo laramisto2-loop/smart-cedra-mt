@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import GeographyPage from './GeographyPage.jsx'
 import ContactsPage from './ContactsPage.jsx'
+import SegmentsPage from './SegmentsPage.jsx'
 import '../App.css'
 
 const navigationItems = [
@@ -8,6 +9,7 @@ const navigationItems = [
   { label: 'Users', icon: '👥' },
   { label: 'Geography', icon: '📍' },
   { label: 'Contacts', icon: '📇' },
+  { label: 'Segments', icon: '◉' },
   { label: 'Tasks', icon: '✓' },
   { label: 'Incidents', icon: '⚠' },
   { label: 'Results', icon: '▤' },
@@ -79,7 +81,7 @@ function Dashboard({ user, onLogout }) {
               }`}
               onClick={() => {
                 if (
-                  ['Dashboard', 'Geography', 'Contacts'].includes(
+                  ['Dashboard', 'Geography', 'Contacts', 'Segments'].includes(
                   item.label,
                   )
                 ) {
@@ -132,7 +134,11 @@ function Dashboard({ user, onLogout }) {
 
         {activePage === 'Contacts' && (
             <ContactsPage user={user} />
-    )}
+        )}
+
+        {activePage === 'Segments' && (
+            <SegmentsPage user={user} />
+      )}
 
 {activePage === 'Dashboard' && (
   <>

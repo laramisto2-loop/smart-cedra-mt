@@ -1669,3 +1669,150 @@
     grid-template-columns: 1fr;
   }
 }
+.segments-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.segments-table {
+  min-width: 1050px;
+}
+
+.segment-type-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.segment-type-pill.static {
+  color: #075985;
+  background: #e0f2fe;
+}
+
+.segment-type-pill.dynamic {
+  color: #6d28d9;
+  background: #ede9fe;
+}
+
+.segment-rule-list {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 180px;
+  font-size: 0.8rem;
+  color: #526b83;
+}
+
+.segment-rule-list span {
+  display: block;
+}
+
+.segment-rule-list strong {
+  color: #173b59;
+}
+
+.segment-rules {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #cfe0ec;
+  border-radius: 14px;
+  background: #f7fbfe;
+}
+
+.segment-rules h4 {
+  margin: 0;
+  color: #082f49;
+}
+
+.member-picker-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 0.75rem;
+}
+
+.member-picker-toolbar > div {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.member-picker {
+  display: grid;
+  max-height: 340px;
+  overflow-y: auto;
+  border: 1px solid #cfe0ec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.member-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #e2ebf2;
+  cursor: pointer;
+}
+
+.member-option:last-child {
+  border-bottom: 0;
+}
+
+.member-option:hover {
+  background: #f4faff;
+}
+
+.member-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.member-option-details {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.member-option-details strong {
+  color: #082f49;
+}
+
+.member-option-details small {
+  overflow: hidden;
+  color: #647d95;
+  text-overflow: ellipsis;
+}
+
+.empty-state.compact {
+  min-height: 150px;
+  padding: 2rem;
+}
+
+@media (max-width: 720px) {
+  .member-picker-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .member-picker-toolbar > div {
+    flex-wrap: wrap;
+  }
+
+  .member-option {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .member-option .status-pill {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
