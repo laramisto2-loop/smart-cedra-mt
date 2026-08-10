@@ -77,6 +77,11 @@ class Tenant extends Model
         return $this->hasMany(ContactSegment::class);
     }
 
+    public function campaignTasks(): HasMany
+    {
+        return $this->hasMany(CampaignTask::class);
+    }
+
     public function settings(): HasOne
     {
         return $this->hasOne(TenantSetting::class);

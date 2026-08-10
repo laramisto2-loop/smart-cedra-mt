@@ -87,6 +87,22 @@ class User extends Authenticatable
         );
     }
 
+    public function createdCampaignTasks(): HasMany
+    {
+        return $this->hasMany(
+            CampaignTask::class,
+            'created_by_user_id'
+        );
+    }
+
+    public function assignedCampaignTasks(): HasMany
+    {
+        return $this->hasMany(
+            CampaignTask::class,
+            'assigned_to_user_id'
+        );
+    }
+
     public function createdSegments(): HasMany
     {
         return $this->hasMany(

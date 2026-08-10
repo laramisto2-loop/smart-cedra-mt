@@ -92,6 +92,11 @@ class Contact extends Model
         return $this->hasMany(ContactInteraction::class);
     }
 
+    public function campaignTasks(): HasMany
+    {
+        return $this->hasMany(CampaignTask::class);
+    }
+
     public function segments(): BelongsToMany
     {
         return $this->belongsToMany(Segment::class)

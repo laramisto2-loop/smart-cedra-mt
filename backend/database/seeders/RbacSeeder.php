@@ -104,6 +104,30 @@ class RbacSeeder extends Seeder
                 'name' => 'Manage segment members',
                 'description' => 'Add and remove contacts from static tenant segments.',
             ],
+            'tasks.view' => [
+                'name' => 'View campaign tasks',
+                'description' => 'View campaign tasks belonging to the active tenant.',
+            ],
+            'tasks.create' => [
+                'name' => 'Create campaign tasks',
+                'description' => 'Create campaign tasks inside the active tenant.',
+            ],
+            'tasks.update' => [
+                'name' => 'Update campaign tasks',
+                'description' => 'Update campaign task details and workflow status.',
+            ],
+            'tasks.assign' => [
+                'name' => 'Assign campaign tasks',
+                'description' => 'Assign campaign tasks to users in the active tenant.',
+            ],
+            'tasks.complete' => [
+                'name' => 'Complete campaign tasks',
+                'description' => 'Complete assigned campaign tasks and record completion notes.',
+            ],
+            'tasks.delete' => [
+                'name' => 'Delete campaign tasks',
+                'description' => 'Delete campaign tasks belonging to the active tenant.',
+            ],
         ];
 
         $permissions = collect($permissionDefinitions)
@@ -143,7 +167,11 @@ class RbacSeeder extends Seeder
                     'segments.create',
                     'segments.update',
                     'segments.members.manage',
-
+                    'tasks.view',
+                    'tasks.create',
+                    'tasks.update',
+                    'tasks.assign',
+                    'tasks.complete',
                 ],
             ],
             'field_agent' => [
@@ -151,6 +179,8 @@ class RbacSeeder extends Seeder
                 'description' => 'Views assigned operational and geography information.',
                 'permissions' => [
                     'geography.view',
+                    'tasks.view',
+                    'tasks.complete',
                 ],
             ],
         ];

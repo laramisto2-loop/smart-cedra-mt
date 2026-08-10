@@ -48,6 +48,11 @@ class Area extends Model
         return $this->hasMany(Contact::class);
     }
 
+    public function campaignTasks(): HasMany
+    {
+        return $this->hasMany(CampaignTask::class);
+    }
+
     public function pollingCenters(): HasMany
     {
         return $this->hasMany(PollingCenter::class);
