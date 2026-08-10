@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\CampaignTaskController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactInteractionController;
 use App\Http\Controllers\Api\DistrictController;
@@ -82,6 +83,23 @@ Route::middleware([
         'segments/{segment}/members',
         [SegmentController::class, 'syncMembers']
     )->name('segments.members.sync');
+
+    Route::patch(
+        'campaign-tasks/{campaignTask}/assign',
+        [CampaignTaskController::class, 'assign']
+    )->name('campaign-tasks.assign');
+
+    Route::patch(
+        'campaign-tasks/{campaignTask}/complete',
+        [CampaignTaskController::class, 'complete']
+    )->name('campaign-tasks.complete');
+
+    Route::apiResource(
+        'campaign-tasks',
+        CampaignTaskController::class
+    )->parameters([
+        'campaign-tasks' => 'campaignTask',
+    ]);
 
     Route::apiResource(
         'segments',
