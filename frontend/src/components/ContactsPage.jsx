@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import ConfirmDialog from './ConfirmDialog.jsx'
 import ContactConsentForm from './ContactConsentForm.jsx'
 import ContactForm from './ContactForm.jsx'
+import ContactTimeline from './ContactTimeline.jsx'
 import { listAreas } from '../services/areas.js'
 import {
   createContact,
@@ -37,6 +38,7 @@ function ContactsPage({ user }) {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [selectedContact, setSelectedContact] = useState(null)
   const [consentContact, setConsentContact] = useState(null)
+  const [timelineContact, setTimelineContact] = useState(null)
   const [contactToDelete, setContactToDelete] = useState(null)
 
   const permissions = user.permissions ?? []
@@ -45,6 +47,9 @@ function ContactsPage({ user }) {
   const canDelete = permissions.includes('contacts.delete')
   const canManageConsent = permissions.includes(
     'contacts.consent.manage',
+  )
+  const canViewTimeline = permissions.includes(
+  'interactions.view',
   )
 
   useEffect(() => {
@@ -181,6 +186,14 @@ function ContactsPage({ user }) {
     closeConsentForm()
     setReloadKey((current) => current + 1)
   }
+
+  function openTimeline(contact) {
+  setTimelineContact(contact)
+  }
+
+function closeTimeline() {
+  setTimelineContact(null)
+}
 
   function openDeleteDialog(contact) {
     setContactToDelete(contact)
@@ -337,9 +350,11 @@ function ContactsPage({ user }) {
                     <th>Area</th>
                     <th>Status</th>
                     <th>Consent</th>
-                    {(canUpdate ||
+                    {(canViewTimeline ||
+                      canUpdate ||
                       canDelete ||
-                      canManageConsent) && <th>Actions</th>}
+                      canManageConsent ||
+                      canViewTimeline) && <th>Actions</th>}
                   </tr>
                 </thead>
 
@@ -412,24 +427,31 @@ function ContactsPage({ user }) {
                           </span>
                         )}
                       </td>
-
-                      {(canUpdate ||
+                      {(canViewTimeline ||
+                        canUpdate ||
                         canDelete ||
                         canManageConsent) && (
                         <td>
                           <div className="table-actions">
-                            {canManageConsent && (
-                              <button
-                                type="button"
-                                className="text-button"
-                                onClick={() =>
-                                  openConsentForm(contact)
-                                }
-                              >
-                                Consent
-                              </button>
-                            )}
+                              {canViewTimeline && (
+                                <button
+                                  type="button"
+                                  className="text-button"
+                                  onClick={() => openTimeline(contact)}
+                                >
+                                  Timeline
+                                </button>
+                              )}
 
+                            {canManageConsent && (
+                                <button
+                                  type="button"
+                                  className="text-button"
+                                  onClick={() => openConsentForm(contact)}
+                                >
+                                  Consent
+                                </button>
+                            )}
                             {canUpdate && (
                               <button
                                 type="button"
@@ -513,6 +535,14 @@ function ContactsPage({ user }) {
           contact={consentContact}
           onSubmit={handleConsentSave}
           onCancel={closeConsentForm}
+        />
+      )}
+
+      {timelineContact && (
+        <ContactTimeline
+          contact={timelineContact}
+          user={user}
+          onClose={closeTimeline}
         />
       )}
 
