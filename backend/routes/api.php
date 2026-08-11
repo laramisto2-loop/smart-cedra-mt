@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\CampaignTaskController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactInteractionController;
+use App\Http\Controllers\Api\ContactTransferController;
 use App\Http\Controllers\Api\DistrictController;
 use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
@@ -42,6 +43,16 @@ Route::middleware([
         'geography/transfers/{type}/import',
         [GeographyTransferController::class, 'import']
     )->name('geography.transfers.import');
+
+    Route::get(
+        'contacts/transfers/template',
+        [ContactTransferController::class, 'template']
+    )->name('contacts.transfers.template');
+
+    Route::get(
+        'contacts/transfers/export',
+        [ContactTransferController::class, 'export']
+    )->name('contacts.transfers.export');
 
     Route::post(
         'contacts/{contact}/consents',
