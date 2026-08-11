@@ -59,6 +59,11 @@ Route::middleware([
         [ContactController::class, 'recordConsent']
     )->name('contacts.consents.record');
 
+    Route::post(
+        'contacts/transfers/preview',
+        [ContactTransferController::class, 'preview']
+    )->name('contacts.transfers.preview');
+
     Route::get(
         'contacts/{contact}/interactions',
         [ContactInteractionController::class, 'index']

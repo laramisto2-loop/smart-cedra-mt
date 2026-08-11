@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PreviewContactImportRequest;
 use App\Models\Contact;
 use App\Services\ContactCsvService;
+use App\Services\ContactImportService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -31,6 +35,18 @@ class ContactTransferController extends Controller
             csvService: $csvService,
             template: false
         );
+    }
+
+    public function preview(
+        PreviewContactImportRequest $request,
+        ContactImportService $importService
+    ): JsonResponse {
+        /** @var UploadedFile $file */
+        $file = $request->file('file');
+
+        return response()->json([
+            'data' => $importService->preview($file),
+        ]);
     }
 
     private function download(

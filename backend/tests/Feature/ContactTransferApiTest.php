@@ -10,6 +10,7 @@ use Database\Seeders\GeographySeeder;
 use Database\Seeders\RbacSeeder;
 use Database\Seeders\TenantSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Testing\TestResponse;
 use RuntimeException;
 use Tests\TestCase;
@@ -202,6 +203,264 @@ class ContactTransferApiTest extends TestCase
         $this->assertSame("'-danger", $rows[1][6]);
     }
 
+    public function test_unauthenticated_user_cannot_preview_contact_import(): void
+    {
+        $file = $this->csvFile(
+            'contacts.csv',
+            implode(',', self::HEADERS)."\n"
+            .'NEW-1,New,Contact,,,,,,en,,active,,'
+        );
+
+        $this->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/preview',
+                ['file' => $file]
+            )
+            ->assertUnauthorized();
+    }
+
+    public function test_user_without_contact_import_permission_cannot_preview(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+
+        $user = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $file = $this->csvFile(
+            'contacts.csv',
+            implode(',', self::HEADERS)."\n"
+            .'NEW-1,New,Contact,,,,,,en,,active,,'
+        );
+
+        $this->actingAs($user)
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/preview',
+                ['file' => $file]
+            )
+            ->assertForbidden();
+    }
+
+    public function test_preview_classifies_creates_and_updates_without_writing(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $area = $this->findArea($tenant);
+
+        $this->createContact(
+            $tenant,
+            $area,
+            'PREVIEW-EXISTING',
+            [
+                'first_name' => 'Original',
+                'last_name' => 'Contact',
+            ]
+        );
+
+        $headers = implode(',', self::HEADERS);
+
+        $existingRow = implode(',', [
+            'PREVIEW-EXISTING',
+            'Updated',
+            'Contact',
+            '',
+            "'+96170111111",
+            'updated@example.test',
+            '',
+            $area->code,
+            'ar',
+            'whatsapp',
+            'active',
+            'csv',
+            'Updated preview row',
+        ]);
+
+        $newRow = implode(',', [
+            'PREVIEW-NEW',
+            'New',
+            'Contact',
+            '',
+            '',
+            'new@example.test',
+            '',
+            $area->code,
+            'en',
+            'email',
+            'active',
+            'csv',
+            'New preview row',
+        ]);
+
+        $file = $this->csvFile(
+            'contacts.csv',
+            implode("\n", [
+                $headers,
+                $existingRow,
+                $newRow,
+            ])
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/preview',
+                ['file' => $file]
+            )
+            ->assertOk()
+            ->assertJsonPath('data.type', 'contacts')
+            ->assertJsonPath('data.summary.total', 2)
+            ->assertJsonPath('data.summary.create', 1)
+            ->assertJsonPath('data.summary.update', 1)
+            ->assertJsonPath('data.summary.invalid', 0)
+            ->assertJsonPath('data.rows.0.status', 'update')
+            ->assertJsonPath(
+                'data.rows.0.data.phone',
+                '+96170111111'
+            )
+            ->assertJsonPath('data.rows.1.status', 'create');
+
+        $this->assertDatabaseHas('contacts', [
+            'tenant_id' => $tenant->id,
+            'reference_code' => 'PREVIEW-EXISTING',
+            'first_name' => 'Original',
+        ]);
+
+        $this->assertDatabaseMissing('contacts', [
+            'tenant_id' => $tenant->id,
+            'reference_code' => 'PREVIEW-NEW',
+        ]);
+    }
+
+    public function test_preview_rejects_invalid_values_foreign_areas_and_duplicates(): void
+    {
+        $cedraTenant = $this->findTenant('cedra-campaign');
+        $futureTenant = $this->findTenant('lebanon-future');
+
+        $cedraArea = $this->findArea($cedraTenant);
+        $futureArea = $this->findArea($futureTenant);
+
+        $futureArea->code = 'FUTURE-ONLY-AREA';
+        $futureArea->save();
+
+        $headers = implode(',', self::HEADERS);
+
+        $invalidRow = implode(',', [
+            'INVALID-1',
+            '',
+            'Contact',
+            '',
+            '',
+            'not-an-email',
+            '',
+            $futureArea->code,
+            'fr',
+            'pigeon',
+            'unknown',
+            'csv',
+            'Invalid row',
+        ]);
+
+        $duplicateRow = implode(',', [
+            'INVALID-1',
+            'Duplicate',
+            'Contact',
+            '',
+            '',
+            'duplicate@example.test',
+            '',
+            $cedraArea->code,
+            'en',
+            'email',
+            'active',
+            'csv',
+            'Duplicate reference',
+        ]);
+
+        $file = $this->csvFile(
+            'contacts.csv',
+            implode("\n", [
+                $headers,
+                $invalidRow,
+                $duplicateRow,
+            ])
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/preview',
+                ['file' => $file]
+            )
+            ->assertOk()
+            ->assertJsonPath('data.summary.total', 2)
+            ->assertJsonPath('data.summary.create', 0)
+            ->assertJsonPath('data.summary.update', 0)
+            ->assertJsonPath('data.summary.invalid', 2)
+            ->assertJsonPath('data.rows.0.status', 'invalid')
+            ->assertJsonPath('data.rows.1.status', 'invalid')
+            ->assertJsonStructure([
+                'data' => [
+                    'rows' => [
+                        0 => [
+                            'errors' => [
+                                'first_name',
+                                'email',
+                                'area_code',
+                                'preferred_language',
+                                'preferred_channel',
+                                'status',
+                            ],
+                        ],
+                        1 => [
+                            'errors' => [
+                                '_row',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $this->assertDatabaseMissing('contacts', [
+            'tenant_id' => $cedraTenant->id,
+            'reference_code' => 'INVALID-1',
+        ]);
+    }
+
+    public function test_preview_rejects_incorrect_contact_csv_headers(): void
+    {
+        $file = $this->csvFile(
+            'contacts.csv',
+            "first_name,reference_code,last_name\nNew,NEW-1,Contact"
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/preview',
+                ['file' => $file]
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('file');
+    }
+
+    public function test_preview_requires_a_contact_csv_file(): void
+    {
+        $file = $this->csvFile(
+            'contacts.txt',
+            implode(',', self::HEADERS)."\n"
+            .'NEW-1,New,Contact,,,,,,en,,active,,'
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/preview',
+                ['file' => $file]
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('file');
+    }
+
     private function cedraAdmin(): User
     {
         return User::query()
@@ -242,6 +501,17 @@ class ContactTransferApiTest extends TestCase
             'status' => 'active',
             ...$overrides,
         ]);
+    }
+
+    private function csvFile(
+        string $name,
+        string $contents
+    ): UploadedFile {
+        return UploadedFile::fake()
+            ->createWithContent(
+                $name,
+                $contents
+            );
     }
 
     /**
