@@ -40,6 +40,94 @@ class RbacSeeder extends Seeder
                 'name' => 'View audit logs',
                 'description' => 'View tenant audit-log records.',
             ],
+            'contacts.view' => [
+                'name' => 'View contacts',
+                'description' => 'View tenant CRM contacts and their consent status.',
+            ],
+            'contacts.create' => [
+                'name' => 'Create contacts',
+                'description' => 'Create contacts inside the active tenant.',
+            ],
+            'contacts.update' => [
+                'name' => 'Update contacts',
+                'description' => 'Update tenant contacts and their operational details.',
+            ],
+            'contacts.delete' => [
+                'name' => 'Delete contacts',
+                'description' => 'Delete contacts belonging to the active tenant.',
+            ],
+            'contacts.consent.manage' => [
+                'name' => 'Manage contact consent',
+                'description' => 'Record consent and opt-out status for contact channels.',
+            ],
+            'contacts.import' => [
+                'name' => 'Import contacts',
+                'description' => 'Bulk import tenant contacts from validated files.',
+            ],
+            'contacts.export' => [
+                'name' => 'Export contacts',
+                'description' => 'Export tenant contact data.',
+            ],
+            'interactions.view' => [
+                'name' => 'View contact interactions',
+                'description' => 'View tenant contact communication timelines.',
+            ],
+            'interactions.create' => [
+                'name' => 'Create contact interactions',
+                'description' => 'Record interactions with tenant contacts.',
+            ],
+            'interactions.update' => [
+                'name' => 'Update contact interactions',
+                'description' => 'Correct tenant contact interaction details.',
+            ],
+            'interactions.delete' => [
+                'name' => 'Delete contact interactions',
+                'description' => 'Delete tenant contact interaction records.',
+            ],
+            'segments.view' => [
+                'name' => 'View segments',
+                'description' => 'View tenant contact segments and their memberships.',
+            ],
+            'segments.create' => [
+                'name' => 'Create segments',
+                'description' => 'Create contact segments inside the active tenant.',
+            ],
+            'segments.update' => [
+                'name' => 'Update segments',
+                'description' => 'Update tenant contact segment details and criteria.',
+            ],
+            'segments.delete' => [
+                'name' => 'Delete segments',
+                'description' => 'Delete contact segments belonging to the active tenant.',
+            ],
+            'segments.members.manage' => [
+                'name' => 'Manage segment members',
+                'description' => 'Add and remove contacts from static tenant segments.',
+            ],
+            'tasks.view' => [
+                'name' => 'View campaign tasks',
+                'description' => 'View campaign tasks belonging to the active tenant.',
+            ],
+            'tasks.create' => [
+                'name' => 'Create campaign tasks',
+                'description' => 'Create campaign tasks inside the active tenant.',
+            ],
+            'tasks.update' => [
+                'name' => 'Update campaign tasks',
+                'description' => 'Update campaign task details and workflow status.',
+            ],
+            'tasks.assign' => [
+                'name' => 'Assign campaign tasks',
+                'description' => 'Assign campaign tasks to users in the active tenant.',
+            ],
+            'tasks.complete' => [
+                'name' => 'Complete campaign tasks',
+                'description' => 'Complete assigned campaign tasks and record completion notes.',
+            ],
+            'tasks.delete' => [
+                'name' => 'Delete campaign tasks',
+                'description' => 'Delete campaign tasks belonging to the active tenant.',
+            ],
         ];
 
         $permissions = collect($permissionDefinitions)
@@ -68,6 +156,22 @@ class RbacSeeder extends Seeder
                     'geography.view',
                     'geography.create',
                     'geography.update',
+                    'contacts.view',
+                    'contacts.create',
+                    'contacts.update',
+                    'contacts.consent.manage',
+                    'interactions.view',
+                    'interactions.create',
+                    'interactions.update',
+                    'segments.view',
+                    'segments.create',
+                    'segments.update',
+                    'segments.members.manage',
+                    'tasks.view',
+                    'tasks.create',
+                    'tasks.update',
+                    'tasks.assign',
+                    'tasks.complete',
                 ],
             ],
             'field_agent' => [
@@ -75,6 +179,8 @@ class RbacSeeder extends Seeder
                 'description' => 'Views assigned operational and geography information.',
                 'permissions' => [
                     'geography.view',
+                    'tasks.view',
+                    'tasks.complete',
                 ],
             ],
         ];

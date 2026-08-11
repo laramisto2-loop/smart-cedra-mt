@@ -2,11 +2,16 @@
 
 use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\CampaignTaskController;
+use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\ContactInteractionController;
+use App\Http\Controllers\Api\ContactTransferController;
 use App\Http\Controllers\Api\DistrictController;
 use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
+use App\Http\Controllers\Api\SegmentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +43,99 @@ Route::middleware([
         'geography/transfers/{type}/import',
         [GeographyTransferController::class, 'import']
     )->name('geography.transfers.import');
+
+    Route::get(
+        'contacts/transfers/template',
+        [ContactTransferController::class, 'template']
+    )->name('contacts.transfers.template');
+
+    Route::get(
+        'contacts/transfers/export',
+        [ContactTransferController::class, 'export']
+    )->name('contacts.transfers.export');
+
+    Route::post(
+        'contacts/{contact}/consents',
+        [ContactController::class, 'recordConsent']
+    )->name('contacts.consents.record');
+
+    Route::post(
+        'contacts/transfers/preview',
+        [ContactTransferController::class, 'preview']
+    )->name('contacts.transfers.preview');
+
+    Route::post(
+        'contacts/transfers/import',
+        [ContactTransferController::class, 'import']
+    )->name('contacts.transfers.import');
+
+    Route::get(
+        'contacts/{contact}/interactions',
+        [ContactInteractionController::class, 'index']
+    )->name('contacts.interactions.index');
+
+    Route::post(
+        'contacts/{contact}/interactions',
+        [ContactInteractionController::class, 'store']
+    )->name('contacts.interactions.store');
+
+    Route::get(
+        'contact-interactions/{contactInteraction}',
+        [ContactInteractionController::class, 'show']
+    )->name('contact-interactions.show');
+
+    Route::match(
+        ['put', 'patch'],
+        'contact-interactions/{contactInteraction}',
+        [ContactInteractionController::class, 'update']
+    )->name('contact-interactions.update');
+
+    Route::delete(
+        'contact-interactions/{contactInteraction}',
+        [ContactInteractionController::class, 'destroy']
+    )->name('contact-interactions.destroy');
+
+    Route::get(
+        'segments/{segment}/members',
+        [SegmentController::class, 'members']
+    )->name('segments.members.index');
+
+    Route::put(
+        'segments/{segment}/members',
+        [SegmentController::class, 'syncMembers']
+    )->name('segments.members.sync');
+
+    Route::patch(
+        'campaign-tasks/{campaignTask}/assign',
+        [CampaignTaskController::class, 'assign']
+    )->name('campaign-tasks.assign');
+
+    Route::patch(
+        'campaign-tasks/{campaignTask}/complete',
+        [CampaignTaskController::class, 'complete']
+    )->name('campaign-tasks.complete');
+
+    Route::get(
+        'campaign-tasks/assignees',
+        [CampaignTaskController::class, 'assignees']
+    )->name('campaign-tasks.assignees');
+
+    Route::apiResource(
+        'campaign-tasks',
+        CampaignTaskController::class
+    )->parameters([
+        'campaign-tasks' => 'campaignTask',
+    ]);
+
+    Route::apiResource(
+        'segments',
+        SegmentController::class
+    );
+
+    Route::apiResource(
+        'contacts',
+        ContactController::class
+    );
 
     Route::apiResource('governorates', GovernorateController::class);
     Route::apiResource('districts', DistrictController::class);

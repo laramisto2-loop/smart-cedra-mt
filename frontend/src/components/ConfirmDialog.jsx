@@ -4,6 +4,9 @@ function ConfirmDialog({
   title,
   message,
   confirmLabel = 'Delete',
+  confirmingLabel = 'Deleting...',
+  errorMessage = 'The action could not be completed. Please try again.',
+  forbiddenMessage = 'You do not have permission to perform this action.',
   onConfirm,
   onCancel,
 }) {
@@ -17,12 +20,12 @@ function ConfirmDialog({
     try {
       await onConfirm()
     } catch (requestError) {
-      const message =
+      setError(
         requestError.response?.status === 403
-          ? 'You do not have permission to delete this record.'
-          : 'The record could not be deleted. Please try again.'
+          ? forbiddenMessage
+          : errorMessage,
+      )
 
-      setError(message)
       setIsConfirming(false)
     }
   }
@@ -66,7 +69,7 @@ function ConfirmDialog({
             onClick={handleConfirm}
             disabled={isConfirming}
           >
-            {isConfirming ? 'Deleting...' : confirmLabel}
+            {isConfirming ? confirmingLabel : confirmLabel}
           </button>
         </div>
       </section>
