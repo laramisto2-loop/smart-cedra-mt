@@ -3,6 +3,7 @@ import ConfirmDialog from './ConfirmDialog.jsx'
 import ContactConsentForm from './ContactConsentForm.jsx'
 import ContactForm from './ContactForm.jsx'
 import ContactTimeline from './ContactTimeline.jsx'
+import ContactTransferDialog from './ContactTransferDialog.jsx'
 import { listAreas } from '../services/areas.js'
 import {
   createContact,
@@ -40,18 +41,21 @@ function ContactsPage({ user }) {
   const [consentContact, setConsentContact] = useState(null)
   const [timelineContact, setTimelineContact] = useState(null)
   const [contactToDelete, setContactToDelete] = useState(null)
+  const [isTransferOpen, setIsTransferOpen] = useState(false)
 
   const permissions = user.permissions ?? []
   const canCreate = permissions.includes('contacts.create')
   const canUpdate = permissions.includes('contacts.update')
   const canDelete = permissions.includes('contacts.delete')
+  const canImport = permissions.includes('contacts.import')
+  const canExport = permissions.includes('contacts.export')
+  const canTransfer = canImport || canExport
   const canManageConsent = permissions.includes(
-    'contacts.consent.manage',
+  'contacts.consent.manage',
   )
   const canViewTimeline = permissions.includes(
   'interactions.view',
   )
-
   useEffect(() => {
     let cancelled = false
 
@@ -195,6 +199,22 @@ function closeTimeline() {
   setTimelineContact(null)
 }
 
+function openTransferDialog() {
+  setIsTransferOpen(true)
+}
+
+function closeTransferDialog() {
+  setIsTransferOpen(false)
+}
+
+function handleContactsImported() {
+  if (page === 1) {
+    setReloadKey((current) => current + 1)
+  } else {
+    setPage(1)
+  }
+  }
+
   function openDeleteDialog(contact) {
     setContactToDelete(contact)
   }
@@ -217,25 +237,39 @@ function closeTimeline() {
   return (
     <section className="contacts-page">
       <div className="page-heading">
-        <div>
-          <p className="eyebrow">CRM management</p>
-          <h2>Contacts</h2>
-          <p className="page-description">
-            Manage consent-aware contacts belonging to{' '}
-            {user.tenant.name}.
-          </p>
-        </div>
+  <div>
+    <p className="eyebrow">CRM management</p>
+    <h2>Contacts</h2>
+    <p className="page-description">
+      Manage consent-aware contacts belonging to{' '}
+      {user.tenant.name}.
+    </p>
+  </div>
 
-        {canCreate && (
-          <button
-            type="button"
-            className="primary-button"
-            onClick={openCreateForm}
-          >
-            Add contact
-          </button>
-        )}
-      </div>
+  {(canTransfer || canCreate) && (
+    <div className="page-heading-actions">
+      {canTransfer && (
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={openTransferDialog}
+        >
+          Import / export
+        </button>
+      )}
+
+      {canCreate && (
+        <button
+          type="button"
+          className="primary-button"
+          onClick={openCreateForm}
+        >
+          Add contact
+        </button>
+      )}
+    </div>
+  )}
+</div>
 
       <article className="content-card contacts-filter-card">
         <form className="contacts-search" onSubmit={applySearch}>
@@ -520,6 +554,14 @@ function closeTimeline() {
           </>
         )}
       </article>
+
+      {isTransferOpen && (
+          <ContactTransferDialog
+            user={user}
+            onImported={handleContactsImported}
+            onClose={closeTransferDialog}
+          />
+      )}
 
       {isFormOpen && (
         <ContactForm
