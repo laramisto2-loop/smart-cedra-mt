@@ -9,6 +9,7 @@ use App\Http\Requests\StoreCampaignTaskRequest;
 use App\Http\Requests\UpdateCampaignTaskRequest;
 use App\Http\Resources\CampaignTaskResource;
 use App\Models\CampaignTask;
+use App\Models\User;
 use App\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -230,6 +231,45 @@ class CampaignTaskController extends Controller
             ->withQueryString();
 
         return CampaignTaskResource::collection($tasks);
+    }
+
+    public function assignees(
+        Request $request
+    ): JsonResponse {
+        Gate::authorize('viewAny', CampaignTask::class);
+
+        abort_unless(
+            $request->user()->hasPermission('tasks.assign'),
+            Response::HTTP_FORBIDDEN
+        );
+
+        $tenantId = app(TenantContext::class)->id();
+
+        $assignees = User::query()
+            ->with('roles:id,slug,name')
+            ->where('tenant_id', $tenantId)
+            ->orderBy('name')
+            ->get([
+                'id',
+                'tenant_id',
+                'name',
+                'email',
+            ])
+            ->map(
+                fn (User $user): array => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'roles' => $user->roles
+                        ->pluck('slug')
+                        ->values()
+                        ->all(),
+                ]
+            );
+
+        return response()->json([
+            'data' => $assignees,
+        ]);
     }
 
     public function store(

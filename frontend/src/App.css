@@ -2061,3 +2061,121 @@
     grid-template-columns: 1fr;
   }
 }
+
+.tasks-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.task-filters {
+  grid-template-columns: repeat(
+    3,
+    minmax(170px, 1fr)
+  );
+}
+
+.task-filters > .secondary-button {
+  align-self: end;
+}
+
+.tasks-table {
+  min-width: 1250px;
+}
+
+.tasks-table td:first-child {
+  min-width: 230px;
+}
+
+.tasks-table td:last-child {
+  min-width: 180px;
+}
+
+.task-type-pill,
+.task-priority-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.task-type-pill {
+  color: #075985;
+  background: #e0f2fe;
+}
+
+.task-priority-pill {
+  text-transform: capitalize;
+}
+
+.task-priority-pill.low {
+  color: #526b83;
+  background: #edf2f7;
+}
+
+.task-priority-pill.normal {
+  color: #075985;
+  background: #e0f2fe;
+}
+
+.task-priority-pill.high {
+  color: #9a5b00;
+  background: #fff2cc;
+}
+
+.task-priority-pill.urgent {
+  color: #b42318;
+  background: #fee4e2;
+}
+
+.status-pill.pending {
+  color: #7a5a00;
+  background: #fff3cd;
+}
+
+.status-pill.in_progress {
+  color: #075985;
+  background: #dff3fc;
+}
+
+.status-pill.completed {
+  color: #087a57;
+  background: #d9f7eb;
+}
+
+.status-pill.cancelled {
+  color: #687586;
+  background: #edf1f5;
+}
+
+.overdue-row {
+  background: #fffafa;
+}
+
+.overdue-row:hover {
+  background: #fff5f5 !important;
+}
+
+.task-overdue,
+.danger-text {
+  color: #c03535;
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .task-filters {
+    grid-template-columns: repeat(
+      2,
+      minmax(170px, 1fr)
+    );
+  }
+}
+
+@media (max-width: 700px) {
+  .task-filters {
+    grid-template-columns: 1fr;
+  }
+}

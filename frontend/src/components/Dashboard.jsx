@@ -2,6 +2,7 @@ import { useState } from 'react'
 import GeographyPage from './GeographyPage.jsx'
 import ContactsPage from './ContactsPage.jsx'
 import SegmentsPage from './SegmentsPage.jsx'
+import CampaignTasksPage from './CampaignTasksPage.jsx'
 import '../App.css'
 
 const navigationItems = [
@@ -81,8 +82,8 @@ function Dashboard({ user, onLogout }) {
               }`}
               onClick={() => {
                 if (
-                  ['Dashboard', 'Geography', 'Contacts', 'Segments'].includes(
-                  item.label,
+                  ['Dashboard', 'Geography', 'Contacts', 'Segments', 'Tasks'].includes(
+                    item.label
                   )
                 ) {
                     setActivePage(item.label)
@@ -138,6 +139,10 @@ function Dashboard({ user, onLogout }) {
 
         {activePage === 'Segments' && (
             <SegmentsPage user={user} />
+      )}
+
+      {activePage === 'Tasks' && (
+          <CampaignTasksPage user={user} />
       )}
 
 {activePage === 'Dashboard' && (

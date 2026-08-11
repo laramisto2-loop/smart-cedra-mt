@@ -40,6 +40,9 @@ class CampaignTaskApiTest extends TestCase
         $this->getJson('/api/campaign-tasks/1')
             ->assertUnauthorized();
 
+        $this->getJson('/api/campaign-tasks/assignees')
+            ->assertUnauthorized();
+
         $this->patchJson(
             '/api/campaign-tasks/1/assign',
             ['assigned_to_user_id' => null]
@@ -51,6 +54,46 @@ class CampaignTaskApiTest extends TestCase
             ['completion_notes' => 'Done']
         )
             ->assertUnauthorized();
+    }
+
+    public function test_admin_only_receives_own_tenant_assignees(): void
+    {
+        $cedraTenant = $this->findTenant('cedra-campaign');
+        $futureTenant = $this->findTenant('lebanon-future');
+        $admin = $this->cedraAdmin();
+
+        $cedraFieldAgent = $this->createUserWithRole(
+            $cedraTenant,
+            'field_agent'
+        );
+
+        $futureFieldAgent = $this->createUserWithRole(
+            $futureTenant,
+            'field_agent'
+        );
+
+        $response = $this->actingAs($admin)
+            ->getJson('/api/campaign-tasks/assignees')
+            ->assertOk();
+
+        $assigneeIds = collect($response->json('data'))
+            ->pluck('id');
+
+        $this->assertTrue(
+            $assigneeIds->contains($admin->id)
+        );
+
+        $this->assertTrue(
+            $assigneeIds->contains($cedraFieldAgent->id)
+        );
+
+        $this->assertFalse(
+            $assigneeIds->contains($futureFieldAgent->id)
+        );
+
+        $this->actingAs($cedraFieldAgent)
+            ->getJson('/api/campaign-tasks/assignees')
+            ->assertForbidden();
     }
 
     public function test_admin_only_receives_and_filters_own_tasks(): void

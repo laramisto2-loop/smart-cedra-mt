@@ -94,6 +94,11 @@ Route::middleware([
         [CampaignTaskController::class, 'complete']
     )->name('campaign-tasks.complete');
 
+    Route::get(
+        'campaign-tasks/assignees',
+        [CampaignTaskController::class, 'assignees']
+    )->name('campaign-tasks.assignees');
+
     Route::apiResource(
         'campaign-tasks',
         CampaignTaskController::class
