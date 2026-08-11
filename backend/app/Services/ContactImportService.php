@@ -6,6 +6,8 @@ use App\Models\Area;
 use App\Models\Contact;
 use App\Models\ContactConsent;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -161,6 +163,63 @@ class ContactImportService
                 $summary['total'] > count($previewRows)
             ),
         ];
+    }
+
+    /**
+     * Validate and persist every row in one transaction.
+     *
+     * @return array<string, mixed>
+     */
+    public function import(UploadedFile $file): array
+    {
+        return DB::transaction(function () use ($file): array {
+            $preview = $this->preview($file);
+
+            if ($preview['summary']['invalid'] > 0) {
+                throw ValidationException::withMessages([
+                    'file' => [
+                        'The import was cancelled because the CSV contains invalid rows.',
+                    ],
+                ]);
+            }
+
+            $csv = $this->openFile($file);
+            $headers = $this->readHeaders($csv);
+            $created = 0;
+            $updated = 0;
+
+            while (! $csv->eof()) {
+                $record = $csv->fgetcsv();
+
+                if (
+                    $record === false
+                    || $this->isBlankRow($record)
+                ) {
+                    continue;
+                }
+
+                [$data] = $this->mapRecord(
+                    $headers,
+                    $record
+                );
+
+                if ($this->persistRow($data)) {
+                    $created++;
+                } else {
+                    $updated++;
+                }
+            }
+
+            return [
+                'type' => 'contacts',
+                'filename' => $file->getClientOriginalName(),
+                'summary' => [
+                    'total' => $created + $updated,
+                    'created' => $created,
+                    'updated' => $updated,
+                ],
+            ];
+        });
     }
 
     private function openFile(
@@ -457,5 +516,49 @@ class ContactImportService
         }
 
         return true;
+    }
+
+    /**
+     * @param  array<string, string|null>  $data
+     */
+    private function persistRow(array $data): bool
+    {
+        $contact = Contact::query()->firstOrNew([
+            'reference_code' => $data['reference_code'],
+        ]);
+
+        $created = ! $contact->exists;
+
+        $areaCode = $data['area_code'];
+
+        $contact->fill([
+            'area_id' => $areaCode === null
+                ? null
+                : $this->areaId($areaCode),
+            'reference_code' => $data['reference_code'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'name_ar' => $data['name_ar'],
+            'phone' => $data['phone'],
+            'email' => $data['email'],
+            'address' => $data['address'],
+            'preferred_language' => $data['preferred_language'],
+            'preferred_channel' => $data['preferred_channel'],
+            'status' => $data['status'],
+            'source' => $data['source'],
+            'notes' => $data['notes'],
+        ]);
+
+        if ($created) {
+            $userId = Auth::id();
+
+            if ($userId !== null) {
+                $contact->created_by_user_id = (int) $userId;
+            }
+        }
+
+        $contact->save();
+
+        return $created;
     }
 }

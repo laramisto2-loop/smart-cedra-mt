@@ -64,6 +64,11 @@ Route::middleware([
         [ContactTransferController::class, 'preview']
     )->name('contacts.transfers.preview');
 
+    Route::post(
+        'contacts/transfers/import',
+        [ContactTransferController::class, 'import']
+    )->name('contacts.transfers.import');
+
     Route::get(
         'contacts/{contact}/interactions',
         [ContactInteractionController::class, 'index']

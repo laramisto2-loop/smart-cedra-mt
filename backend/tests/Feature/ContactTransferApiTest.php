@@ -461,6 +461,248 @@ class ContactTransferApiTest extends TestCase
             ->assertJsonValidationErrors('file');
     }
 
+    public function test_unauthenticated_user_cannot_confirm_contact_import(): void
+    {
+        $file = $this->csvFile(
+            'contacts.csv',
+            implode(',', self::HEADERS)."\n"
+            .'IMPORT-1,New,Contact,,,,,,en,,active,,'
+        );
+
+        $this->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/import',
+                [
+                    'file' => $file,
+                    'confirmed' => true,
+                ]
+            )
+            ->assertUnauthorized();
+    }
+
+    public function test_user_without_contact_import_permission_cannot_import(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+
+        $user = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $file = $this->csvFile(
+            'contacts.csv',
+            implode(',', self::HEADERS)."\n"
+            .'IMPORT-1,New,Contact,,,,,,en,,active,,'
+        );
+
+        $this->actingAs($user)
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/import',
+                [
+                    'file' => $file,
+                    'confirmed' => true,
+                ]
+            )
+            ->assertForbidden();
+    }
+
+    public function test_contact_import_requires_explicit_confirmation(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+
+        $file = $this->csvFile(
+            'contacts.csv',
+            implode(',', self::HEADERS)."\n"
+            .'UNCONFIRMED,New,Contact,,,,,,en,,active,,'
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/import',
+                ['file' => $file]
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('confirmed');
+
+        $this->assertDatabaseMissing('contacts', [
+            'tenant_id' => $tenant->id,
+            'reference_code' => 'UNCONFIRMED',
+        ]);
+    }
+
+    public function test_confirmed_import_creates_and_updates_contacts(): void
+    {
+        $admin = $this->cedraAdmin();
+        $tenant = $this->findTenant('cedra-campaign');
+        $area = $this->findArea($tenant);
+
+        $originalCreator = User::factory()->create([
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $this->createContact(
+            $tenant,
+            $area,
+            'IMPORT-EXISTING',
+            [
+                'created_by_user_id' => $originalCreator->id,
+                'first_name' => 'Original',
+                'last_name' => 'Contact',
+                'email' => 'original@example.test',
+            ]
+        );
+
+        $headers = implode(',', self::HEADERS);
+
+        $updatedRow = implode(',', [
+            'IMPORT-EXISTING',
+            'Updated',
+            'Contact',
+            '',
+            "'+96170111111",
+            'updated@example.test',
+            'Updated address',
+            $area->code,
+            'ar',
+            'whatsapp',
+            'inactive',
+            'csv',
+            'Updated through import',
+        ]);
+
+        $createdRow = implode(',', [
+            'IMPORT-NEW',
+            'New',
+            'Contact',
+            '',
+            "'+96170222222",
+            'new@example.test',
+            'New address',
+            $area->code,
+            'en',
+            'email',
+            'active',
+            'csv',
+            'Created through import',
+        ]);
+
+        $file = $this->csvFile(
+            'contacts.csv',
+            implode("\n", [
+                $headers,
+                $updatedRow,
+                $createdRow,
+            ])
+        );
+
+        $this->actingAs($admin)
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/import',
+                [
+                    'file' => $file,
+                    'confirmed' => true,
+                ]
+            )
+            ->assertOk()
+            ->assertJsonPath('data.type', 'contacts')
+            ->assertJsonPath('data.summary.total', 2)
+            ->assertJsonPath('data.summary.created', 1)
+            ->assertJsonPath('data.summary.updated', 1);
+
+        $this->assertDatabaseHas('contacts', [
+            'tenant_id' => $tenant->id,
+            'reference_code' => 'IMPORT-EXISTING',
+            'created_by_user_id' => $originalCreator->id,
+            'first_name' => 'Updated',
+            'phone' => '+96170111111',
+            'email' => 'updated@example.test',
+            'status' => 'inactive',
+        ]);
+
+        $this->assertDatabaseHas('contacts', [
+            'tenant_id' => $tenant->id,
+            'area_id' => $area->id,
+            'created_by_user_id' => $admin->id,
+            'reference_code' => 'IMPORT-NEW',
+            'first_name' => 'New',
+            'phone' => '+96170222222',
+            'email' => 'new@example.test',
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_invalid_contact_import_is_rejected_without_writing_rows(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $area = $this->findArea($tenant);
+        $headers = implode(',', self::HEADERS);
+
+        $validRow = implode(',', [
+            'ATOMIC-GOOD',
+            'Valid',
+            'Contact',
+            '',
+            '',
+            'valid@example.test',
+            '',
+            $area->code,
+            'en',
+            'email',
+            'active',
+            'csv',
+            'Valid row',
+        ]);
+
+        $invalidRow = implode(',', [
+            'ATOMIC-BAD',
+            'Invalid',
+            '',
+            '',
+            '',
+            'not-an-email',
+            '',
+            $area->code,
+            'invalid-language',
+            '',
+            'active',
+            'csv',
+            'Invalid row',
+        ]);
+
+        $file = $this->csvFile(
+            'contacts.csv',
+            implode("\n", [
+                $headers,
+                $validRow,
+                $invalidRow,
+            ])
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->withHeader('Accept', 'application/json')
+            ->post(
+                '/api/contacts/transfers/import',
+                [
+                    'file' => $file,
+                    'confirmed' => true,
+                ]
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('file');
+
+        $this->assertDatabaseMissing('contacts', [
+            'tenant_id' => $tenant->id,
+            'reference_code' => 'ATOMIC-GOOD',
+        ]);
+
+        $this->assertDatabaseMissing('contacts', [
+            'tenant_id' => $tenant->id,
+            'reference_code' => 'ATOMIC-BAD',
+        ]);
+    }
+
     private function cedraAdmin(): User
     {
         return User::query()

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ImportContactRequest;
 use App\Http\Requests\PreviewContactImportRequest;
 use App\Models\Contact;
 use App\Services\ContactCsvService;
@@ -46,6 +47,18 @@ class ContactTransferController extends Controller
 
         return response()->json([
             'data' => $importService->preview($file),
+        ]);
+    }
+
+    public function import(
+        ImportContactRequest $request,
+        ContactImportService $importService
+    ): JsonResponse {
+        /** @var UploadedFile $file */
+        $file = $request->file('file');
+
+        return response()->json([
+            'data' => $importService->import($file),
         ]);
     }
 
