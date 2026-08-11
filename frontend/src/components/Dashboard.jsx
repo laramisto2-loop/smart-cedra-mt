@@ -1,56 +1,120 @@
 import { useState } from 'react'
-import GeographyPage from './GeographyPage.jsx'
-import ContactsPage from './ContactsPage.jsx'
-import SegmentsPage from './SegmentsPage.jsx'
 import CampaignTasksPage from './CampaignTasksPage.jsx'
+import ContactsPage from './ContactsPage.jsx'
+import GeographyPage from './GeographyPage.jsx'
+import SegmentsPage from './SegmentsPage.jsx'
 import '../App.css'
 
 const navigationItems = [
-  { label: 'Dashboard', icon: '▦' },
-  { label: 'Users', icon: '👥' },
-  { label: 'Geography', icon: '📍' },
-  { label: 'Contacts', icon: '📇' },
-  { label: 'Segments', icon: '◉' },
-  { label: 'Tasks', icon: '✓' },
-  { label: 'Incidents', icon: '⚠' },
-  { label: 'Results', icon: '▤' },
-  { label: 'Settings', icon: '⚙' },
+  {
+    label: 'Dashboard',
+    icon: '▦',
+    enabled: true,
+  },
+  {
+    label: 'Users',
+    icon: '👥',
+    permission: 'users.manage',
+    enabled: false,
+  },
+  {
+    label: 'Geography',
+    icon: '📍',
+    permission: 'geography.view',
+    enabled: true,
+  },
+  {
+    label: 'Contacts',
+    icon: '📇',
+    permission: 'contacts.view',
+    enabled: true,
+  },
+  {
+    label: 'Segments',
+    icon: '◉',
+    permission: 'segments.view',
+    enabled: true,
+  },
+  {
+    label: 'Tasks',
+    icon: '✓',
+    permission: 'tasks.view',
+    enabled: true,
+  },
+  {
+    label: 'Incidents',
+    icon: '⚠',
+    enabled: false,
+  },
+  {
+    label: 'Results',
+    icon: '▤',
+    enabled: false,
+  },
+  {
+    label: 'Settings',
+    icon: '⚙',
+    enabled: false,
+  },
 ]
 
-const statistics = [
-  {
-    label: 'Campaign users',
-    value: '1',
-    description: 'Active tenant members',
-  },
-  {
-    label: 'Open tasks',
-    value: '0',
-    description: 'No pending assignments',
-  },
-  {
-    label: 'Registered contacts',
-    value: '0',
-    description: 'CRM module coming next',
-  },
-  {
-    label: 'Reported incidents',
-    value: '0',
-    description: 'No incidents submitted',
-  },
+const deliveryItems = [
+  'Consent-aware contact management',
+  'Static and dynamic contact segmentation',
+  'Consent-aware interaction timelines',
+  'Task creation and assignment workflows',
+  'Validated contact CSV import and export',
 ]
 
 function Dashboard({ user, onLogout }) {
   const [activePage, setActivePage] = useState('Dashboard')
+  const permissions = user.permissions ?? []
+
+  const visibleNavigationItems = navigationItems.filter(
+    (item) =>
+      !item.permission || permissions.includes(item.permission),
+  )
+
+  const capabilities = [
+    {
+      label: 'CRM contacts',
+      permission: 'contacts.view',
+      description: 'Profiles, consent, and data transfer',
+    },
+    {
+      label: 'Contact segments',
+      permission: 'segments.view',
+      description: 'Manual and rule-based audiences',
+    },
+    {
+      label: 'Interaction timeline',
+      permission: 'interactions.view',
+      description: 'Consent-aware communication history',
+    },
+    {
+      label: 'Campaign tasks',
+      permission: 'tasks.view',
+      description: 'Assignments and completion workflows',
+    },
+  ]
+
   const initials = user.name
     .split(' ')
     .map((part) => part[0])
     .join('')
     .slice(0, 2)
     .toUpperCase()
-    const tenantStatus =
+
+  const tenantStatus =
     user.tenant.status.charAt(0).toUpperCase() +
     user.tenant.status.slice(1)
+
+  function selectPage(item) {
+    if (item.enabled) {
+      setActivePage(item.label)
+    }
+  }
+
   return (
     <div className="admin-layout">
       <aside className="sidebar">
@@ -72,25 +136,24 @@ function Dashboard({ user, onLogout }) {
           </span>
         </div>
 
-        <nav className="navigation" aria-label="Main navigation">
-          {navigationItems.map((item) => (
+        <nav
+          className="navigation"
+          aria-label="Main navigation"
+        >
+          {visibleNavigationItems.map((item) => (
             <button
               type="button"
               key={item.label}
               className={`navigation-item ${
                 activePage === item.label ? 'active' : ''
               }`}
-              onClick={() => {
-                if (
-                  ['Dashboard', 'Geography', 'Contacts', 'Segments', 'Tasks'].includes(
-                    item.label
-                  )
-                ) {
-                    setActivePage(item.label)
-                  }
-              }}
+              onClick={() => selectPage(item)}
+              aria-disabled={!item.enabled}
             >
-              <span className="navigation-icon" aria-hidden="true">
+              <span
+                className="navigation-icon"
+                aria-hidden="true"
+              >
                 {item.icon}
               </span>
               <span>{item.label}</span>
@@ -130,124 +193,130 @@ function Dashboard({ user, onLogout }) {
         </header>
 
         {activePage === 'Geography' && (
-            <GeographyPage user={user} />
+          <GeographyPage user={user} />
         )}
 
         {activePage === 'Contacts' && (
-            <ContactsPage user={user} />
+          <ContactsPage user={user} />
         )}
 
         {activePage === 'Segments' && (
-            <SegmentsPage user={user} />
-      )}
+          <SegmentsPage user={user} />
+        )}
 
-      {activePage === 'Tasks' && (
+        {activePage === 'Tasks' && (
           <CampaignTasksPage user={user} />
-      )}
+        )}
 
-{activePage === 'Dashboard' && (
-  <>
-
-        <section className="welcome-panel">
-          <div>
-            <span className="panel-badge">MT-3 RBAC + Geography + Audit</span>
-            <h3>Welcome to {user.tenant.name}</h3>
-            <p>
-              This administration shell represents one tenant inside the ElectoFlow campaign-management platform. Data belonging to other
-              tenants is isolated and unavailable here.
-            </p>
-          </div>
-
-          <div className="isolation-indicator">
-            <span className="shield-icon">✓</span>
-            <div>
-              <strong>Tenant isolation active</strong>
-              <span>Protected by tenant-aware middleware</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="statistics-grid" aria-label="Campaign statistics">
-          {statistics.map((statistic) => (
-            <article className="statistic-card" key={statistic.label}>
-              <span>{statistic.label}</span>
-              <strong>{statistic.value}</strong>
-              <p>{statistic.description}</p>
-            </article>
-          ))}
-        </section>
-
-        <section className="content-grid">
-          <article className="content-card">
-            <div className="card-heading">
+        {activePage === 'Dashboard' && (
+          <>
+            <section className="welcome-panel">
               <div>
-                <p className="eyebrow">Tenant information</p>
-                <h3>Campaign configuration</h3>
+                <span className="panel-badge">
+                  MT-4 CRM + Tasks
+                </span>
+                <h3>Welcome to {user.tenant.name}</h3>
+                <p>
+                  Manage tenant-isolated contacts, audiences,
+                  communication history, and campaign assignments
+                  from one protected workspace.
+                </p>
               </div>
 
-              <button type="button" className="secondary-button">
-                Manage settings
-              </button>
-            </div>
-
-            <dl className="details-list">
-              <div>
-                <dt>Tenant name</dt>
-                <dd>{user.tenant.name}</dd>
+              <div className="isolation-indicator">
+                <span className="shield-icon">✓</span>
+                <div>
+                  <strong>Tenant isolation active</strong>
+                  <span>
+                    Protected by tenant-aware authorization
+                  </span>
+                </div>
               </div>
+            </section>
 
-              <div>
-                <dt>Tenant slug</dt>
-                <dd>{user.tenant.slug}</dd>
-              </div>
+            <section
+              className="statistics-grid"
+              aria-label="Available campaign capabilities"
+            >
+              {capabilities.map((capability) => {
+                const available = permissions.includes(
+                  capability.permission,
+                )
 
-              <div>
-                <dt>Timezone</dt>
-                <dd>Asia/Beirut</dd>
-              </div>
+                return (
+                  <article
+                    className="statistic-card"
+                    key={capability.label}
+                  >
+                    <span>{capability.label}</span>
+                    <strong>
+                      {available ? 'Ready' : 'Restricted'}
+                    </strong>
+                    <p>{capability.description}</p>
+                  </article>
+                )
+              })}
+            </section>
 
-              <div>
-                <dt>Status</dt>
-                <dd>
-                  <span className="active-pill">{tenantStatus}</span>
-                </dd>
-              </div>
-            </dl>
-          </article>
+            <section className="content-grid">
+              <article className="content-card">
+                <div className="card-heading">
+                  <div>
+                    <p className="eyebrow">
+                      Tenant information
+                    </p>
+                    <h3>Campaign configuration</h3>
+                  </div>
+                </div>
 
-          <article className="content-card">
-            <div className="card-heading">
-              <div>
-                <p className="eyebrow">Implementation progress</p>
-                <h3>MT-3 backend foundation</h3>
-              </div>
-            </div>
+                <dl className="details-list">
+                  <div>
+                    <dt>Tenant name</dt>
+                    <dd>{user.tenant.name}</dd>
+                  </div>
 
-            <ul className="progress-list">
-              <li>
-                <span className="progress-check">✓</span>
-                Tenant isolation and settings
-              </li>
-              <li>
-                <span className="progress-check">✓</span>
-                Role-based access control
-              </li>
-              <li>
-                <span className="progress-check">✓</span>
-                Geography hierarchy and APIs
-              </li>
-              <li>
-                <span className="progress-check">✓</span>
-                Immutable audit logging
-              </li>
-              <li>
-                <span className="progress-check">✓</span>
-                Secure SPA authentication
-              </li>
-            </ul>
-          </article>
-        </section>
-        </>
+                  <div>
+                    <dt>Tenant slug</dt>
+                    <dd>{user.tenant.slug}</dd>
+                  </div>
+
+                  <div>
+                    <dt>Timezone</dt>
+                    <dd>Asia/Beirut</dd>
+                  </div>
+
+                  <div>
+                    <dt>Status</dt>
+                    <dd>
+                      <span className="active-pill">
+                        {tenantStatus}
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+
+              <article className="content-card">
+                <div className="card-heading">
+                  <div>
+                    <p className="eyebrow">
+                      Implementation progress
+                    </p>
+                    <h3>MT-4 delivery</h3>
+                  </div>
+                </div>
+
+                <ul className="progress-list">
+                  {deliveryItems.map((item) => (
+                    <li key={item}>
+                      <span className="progress-check">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </section>
+          </>
         )}
       </main>
     </div>
