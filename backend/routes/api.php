@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\ContactTransferController;
 use App\Http\Controllers\Api\DistrictController;
 use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
+use App\Http\Controllers\Api\IncidentAttachmentController;
+use App\Http\Controllers\Api\IncidentController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
 use App\Http\Controllers\Api\SegmentController;
@@ -23,6 +25,36 @@ Route::middleware([
         'user',
         [AuthenticatedSessionController::class, 'show']
     )->name('user.show');
+
+    Route::patch(
+        'incidents/{incident}/assign',
+        [IncidentController::class, 'assign']
+    )->name('incidents.assign');
+
+    Route::patch(
+        'incidents/{incident}/review',
+        [IncidentController::class, 'review']
+    )->name('incidents.review');
+
+    Route::post(
+        'incidents/{incident}/attachments',
+        [IncidentAttachmentController::class, 'store']
+    )->name('incidents.attachments.store');
+
+    Route::get(
+        'incident-attachments/{incidentAttachment}/download',
+        [IncidentAttachmentController::class, 'download']
+    )->name('incident-attachments.download');
+
+    Route::delete(
+        'incident-attachments/{incidentAttachment}',
+        [IncidentAttachmentController::class, 'destroy']
+    )->name('incident-attachments.destroy');
+
+    Route::apiResource(
+        'incidents',
+        IncidentController::class
+    );
 
     Route::get(
         'geography/transfers/{type}/template',
