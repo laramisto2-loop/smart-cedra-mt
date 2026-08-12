@@ -8,6 +8,7 @@ use App\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
 
 class CampaignTask extends Model
@@ -146,6 +147,11 @@ class CampaignTask extends Model
             User::class,
             'assigned_to_user_id'
         );
+    }
+
+    public function incidents(): HasMany
+    {
+        return $this->hasMany(Incident::class);
     }
 
     private static function ensureContactBelongsToTenant(

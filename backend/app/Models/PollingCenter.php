@@ -58,6 +58,11 @@ class PollingCenter extends Model
     {
         return 'area_id';
     }
+
+    public function incidents(): HasMany
+    {
+        return $this->hasMany(Incident::class);
+    }
 }
 
 // Area → has many Polling Centers

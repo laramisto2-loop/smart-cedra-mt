@@ -159,4 +159,36 @@ class User extends Authenticatable
             })
             ->exists();
     }
+
+    public function reportedIncidents(): HasMany
+    {
+        return $this->hasMany(
+            Incident::class,
+            'reported_by_user_id'
+        );
+    }
+
+    public function assignedIncidents(): HasMany
+    {
+        return $this->hasMany(
+            Incident::class,
+            'assigned_to_user_id'
+        );
+    }
+
+    public function reviewedIncidents(): HasMany
+    {
+        return $this->hasMany(
+            Incident::class,
+            'reviewed_by_user_id'
+        );
+    }
+
+    public function uploadedIncidentAttachments(): HasMany
+    {
+        return $this->hasMany(
+            IncidentAttachment::class,
+            'uploaded_by_user_id'
+        );
+    }
 }

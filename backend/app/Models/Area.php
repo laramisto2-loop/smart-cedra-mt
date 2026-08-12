@@ -67,6 +67,11 @@ class Area extends Model
     {
         return 'district_id';
     }
+
+    public function incidents(): HasMany
+    {
+        return $this->hasMany(Incident::class);
+    }
 }
 
 // District → has many Areas
