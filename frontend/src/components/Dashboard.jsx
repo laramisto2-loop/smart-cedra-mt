@@ -2,6 +2,7 @@ import { useState } from 'react'
 import CampaignTasksPage from './CampaignTasksPage.jsx'
 import ContactsPage from './ContactsPage.jsx'
 import GeographyPage from './GeographyPage.jsx'
+import IncidentsPage from './IncidentsPage.jsx'
 import SegmentsPage from './SegmentsPage.jsx'
 import '../App.css'
 
@@ -44,7 +45,8 @@ const navigationItems = [
   {
     label: 'Incidents',
     icon: '⚠',
-    enabled: false,
+    permission: 'incidents.view',
+    enabled: true,
   },
   {
     label: 'Results',
@@ -64,6 +66,7 @@ const deliveryItems = [
   'Consent-aware interaction timelines',
   'Task creation and assignment workflows',
   'Validated contact CSV import and export',
+  'Offline-safe incident reporting and evidence',
 ]
 
 function Dashboard({ user, onLogout }) {
@@ -95,6 +98,11 @@ function Dashboard({ user, onLogout }) {
       label: 'Campaign tasks',
       permission: 'tasks.view',
       description: 'Assignments and completion workflows',
+    },
+    {
+      label: 'Field incidents',
+      permission: 'incidents.view',
+      description: 'Reports, triage, and private evidence',
     },
   ]
 
@@ -208,18 +216,22 @@ function Dashboard({ user, onLogout }) {
           <CampaignTasksPage user={user} />
         )}
 
+        {activePage === 'Incidents' && (
+          <IncidentsPage user={user} />
+        )}
+
         {activePage === 'Dashboard' && (
           <>
             <section className="welcome-panel">
               <div>
                 <span className="panel-badge">
-                  MT-4 CRM + Tasks
+                  MT-5 Field PWA + Incidents
                 </span>
                 <h3>Welcome to {user.tenant.name}</h3>
                 <p>
                   Manage tenant-isolated contacts, audiences,
-                  communication history, and campaign assignments
-                  from one protected workspace.
+                  assignments, and field incident reports from one
+                  protected workspace.
                 </p>
               </div>
 
@@ -302,7 +314,7 @@ function Dashboard({ user, onLogout }) {
                     <p className="eyebrow">
                       Implementation progress
                     </p>
-                    <h3>MT-4 delivery</h3>
+                    <h3>MT-5 delivery</h3>
                   </div>
                 </div>
 
