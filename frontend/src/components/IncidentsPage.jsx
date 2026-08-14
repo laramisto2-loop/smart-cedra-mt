@@ -1,19 +1,26 @@
-import { useEffect, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import ConfirmDialog from './ConfirmDialog.jsx'
 import IncidentAssignmentForm from './IncidentAssignmentForm.jsx'
 import IncidentDetails from './IncidentDetails.jsx'
 import IncidentForm from './IncidentForm.jsx'
 import IncidentReviewForm from './IncidentReviewForm.jsx'
+import OfflineIncidentStatus from './OfflineIncidentStatus.jsx'
 import { listAreas } from '../services/areas.js'
 import {
   assignIncident,
-  createIncident,
   deleteIncident,
   getIncident,
   listIncidents,
   reviewIncident,
   updateIncident,
 } from '../services/incidents.js'
+import {
+  submitIncidentWithOfflineFallback,
+} from '../services/incidentSync.js'
 import { listPollingCenters } from '../services/pollingCenters.js'
 import { listPollingStations } from '../services/pollingStations.js'
 import {
@@ -107,6 +114,7 @@ function IncidentsPage({ user }) {
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [lookupWarning, setLookupWarning] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -203,9 +211,17 @@ function IncidentsPage({ user }) {
     return () => { cancelled = true }
   }, [areaId, assigneeId, category, page, reloadKey, scope, search, severity, status])
 
-  function refreshIncidents() {
+    const refreshIncidents = useCallback(() => {
     setReloadKey((current) => current + 1)
-  }
+  }, [])
+
+  const handleSynchronized = useCallback(() => {
+    setNotice(
+      'Queued incident reports synchronized successfully.',
+    )
+    setPage(1)
+    refreshIncidents()
+  }, [refreshIncidents])
 
   function applySearch(event) {
     event.preventDefault()
@@ -240,11 +256,28 @@ function IncidentsPage({ user }) {
     refreshIncidents()
   }
 
-  async function saveIncident(payload) {
+    async function saveIncident(payload) {
     if (editingIncident) {
       await updateIncident(editingIncident.id, payload)
+
+      setNotice('Incident changes saved successfully.')
     } else {
-      await createIncident(payload)
+      const result =
+        await submitIncidentWithOfflineFallback(
+          payload,
+          user,
+        )
+
+      if (result.state === 'queued') {
+        setNotice(
+          'Incident saved offline. It will synchronize automatically when the connection returns.',
+        )
+        setIsFormOpen(false)
+        setEditingIncident(null)
+        return
+      }
+
+      setNotice('Incident submitted successfully.')
     }
 
     setIsFormOpen(false)
@@ -304,8 +337,25 @@ function IncidentsPage({ user }) {
         )}
       </div>
 
+      <OfflineIncidentStatus
+        user={user}
+        onSynchronized={handleSynchronized}
+      />
+
+      {notice && (
+        <div
+          className="form-message success-message"
+          role="status"
+        >
+          {notice}
+        </div>
+      )}
+
       {lookupWarning && (
-        <div className="form-message error-message" role="alert">
+        <div
+          className="form-message error-message"
+          role="alert"
+        >
           {lookupWarning}
         </div>
       )}

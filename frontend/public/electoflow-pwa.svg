@@ -1,0 +1,25 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 512 512"
+  role="img"
+  aria-labelledby="title description"
+>
+  <title id="title">ElectoFlow</title>
+  <desc id="description">ElectoFlow campaign operations application icon</desc>
+
+  <rect width="512" height="512" rx="112" fill="#063f63" />
+
+  <rect
+    x="56"
+    y="56"
+    width="400"
+    height="400"
+    rx="92"
+    fill="#08a9e6"
+  />
+
+  <path
+    d="M156 121h212v60H226v47h126v57H226v46h147v60H156V121Z"
+    fill="#ffffff"
+  />
+</svg>
