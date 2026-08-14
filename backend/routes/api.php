@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\IncidentController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
 use App\Http\Controllers\Api\SegmentController;
+use App\Http\Controllers\Api\TurnoutSnapshotController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,24 @@ Route::middleware([
     'auth:sanctum',
     'tenant',
 ])->group(function (): void {
+    Route::get(
+        'turnout-snapshots/series',
+        [TurnoutSnapshotController::class, 'series']
+    )->name('turnout-snapshots.series');
+
+    Route::apiResource(
+        'turnout-snapshots',
+        TurnoutSnapshotController::class
+    )
+        ->only([
+            'index',
+            'store',
+            'show',
+        ])
+        ->parameters([
+            'turnout-snapshots' => 'turnoutSnapshot',
+        ]);
+
     Route::get(
         'user',
         [AuthenticatedSessionController::class, 'show']
