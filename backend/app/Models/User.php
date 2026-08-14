@@ -191,4 +191,12 @@ class User extends Authenticatable
             'uploaded_by_user_id'
         );
     }
+
+    public function reportedTurnoutSnapshots(): HasMany
+    {
+        return $this->hasMany(
+            TurnoutSnapshot::class,
+            'reported_by_user_id'
+        );
+    }
 }

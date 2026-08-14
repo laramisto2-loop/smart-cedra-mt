@@ -156,6 +156,14 @@ class RbacSeeder extends Seeder
                 'name' => 'Delete incidents',
                 'description' => 'Delete incident reports belonging to the active tenant.',
             ],
+            'turnout.view' => [
+                'name' => 'View turnout snapshots',
+                'description' => 'View aggregate turnout snapshots belonging to the active tenant.',
+            ],
+            'turnout.create' => [
+                'name' => 'Create turnout snapshots',
+                'description' => 'Submit aggregate polling-centre and polling-station turnout counts.',
+            ],
         ];
 
         $permissions = collect($permissionDefinitions)
@@ -206,6 +214,8 @@ class RbacSeeder extends Seeder
                     'incidents.assign',
                     'incidents.review',
                     'incidents.attachments.manage',
+                    'turnout.view',
+                    'turnout.create',
                 ],
             ],
             'field_agent' => [
@@ -219,6 +229,8 @@ class RbacSeeder extends Seeder
                     'incidents.create',
                     'incidents.update',
                     'incidents.attachments.manage',
+                    'turnout.view',
+                    'turnout.create',
                 ],
             ],
         ];

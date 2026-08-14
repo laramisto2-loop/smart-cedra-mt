@@ -96,6 +96,11 @@ class Tenant extends Model
     {
         return $this->hasMany(IncidentAttachment::class);
     }
+
+    public function turnoutSnapshots(): HasMany
+    {
+        return $this->hasMany(TurnoutSnapshot::class);
+    }
 }
 
 // This lets us retrieve geography directly from a tenant:

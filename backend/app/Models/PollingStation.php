@@ -55,6 +55,11 @@ class PollingStation extends Model
     {
         return 'polling_center_id';
     }
+
+    public function turnoutSnapshots(): HasMany
+    {
+        return $this->hasMany(TurnoutSnapshot::class);
+    }
 }
 
 // Polling Center → has many Polling Stations

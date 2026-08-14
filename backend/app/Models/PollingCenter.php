@@ -63,6 +63,11 @@ class PollingCenter extends Model
     {
         return $this->hasMany(Incident::class);
     }
+
+    public function turnoutSnapshots(): HasMany
+    {
+        return $this->hasMany(TurnoutSnapshot::class);
+    }
 }
 
 // Area → has many Polling Centers
