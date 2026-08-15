@@ -141,6 +141,33 @@ class MessagingFoundationTest extends TestCase
         );
     }
 
+    public function test_template_variables_are_derived_from_its_body(): void
+    {
+        $admin = $this->findUser('admin@cedra.test');
+
+        $template = $this->createTemplate($admin, [
+            'body' => 'Hello {{ first_name }}, your shift begins at {{shift_time}}. {{first_name}}',
+            'variables' => ['incorrect_variable'],
+        ]);
+
+        $this->assertSame(
+            ['first_name', 'shift_time'],
+            $template->variables
+        );
+
+        $template->update([
+            'body' => 'Hello {{full_name}}, this is your reminder.',
+            'variables' => [],
+        ]);
+
+        $template->refresh();
+
+        $this->assertSame(
+            ['full_name'],
+            $template->variables
+        );
+    }
+
     public function test_tenant_only_queries_its_own_messaging_records(): void
     {
         $cedraAdmin = $this->findUser('admin@cedra.test');

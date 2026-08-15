@@ -70,6 +70,16 @@ class MessageTemplate extends Model
                 );
             }
 
+            preg_match_all(
+                '/{{\s*([a-zA-Z][a-zA-Z0-9_]*)\s*}}/u',
+                (string) $template->body,
+                $variableMatches
+            );
+
+            $template->variables = array_values(
+                array_unique($variableMatches[1] ?? [])
+            );
+
             if (
                 ! in_array(
                     $template->channel,
