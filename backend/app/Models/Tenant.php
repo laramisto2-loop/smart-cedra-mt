@@ -116,6 +116,26 @@ class Tenant extends Model
     {
         return $this->hasMany(MessageDeliveryEvent::class);
     }
+
+    public function callScripts(): HasMany
+    {
+        return $this->hasMany(CallScript::class);
+    }
+
+    public function callQueues(): HasMany
+    {
+        return $this->hasMany(CallQueue::class);
+    }
+
+    public function callAssignments(): HasMany
+    {
+        return $this->hasMany(CallAssignment::class);
+    }
+
+    public function callAttempts(): HasMany
+    {
+        return $this->hasMany(CallAttempt::class);
+    }
 }
 
 // This lets us retrieve geography directly from a tenant:
