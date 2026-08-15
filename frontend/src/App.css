@@ -2550,3 +2550,171 @@
     justify-content: flex-start;
   }
 }
+
+.turnout-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.turnout-filters {
+  grid-template-columns: repeat(3, minmax(170px, 1fr));
+}
+
+.turnout-filters > .secondary-button {
+  align-self: end;
+}
+
+.turnout-series-panel {
+  padding: 23px;
+  overflow: hidden;
+  border: 1px solid #dde5ee;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgb(24 49 79 / 5%);
+}
+
+.turnout-series-panel .card-heading {
+  margin-bottom: 1.25rem;
+}
+
+.turnout-summary-grid {
+  margin-bottom: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.turnout-summary-grid article {
+  padding: 1rem;
+  border: 1px solid #dce7ef;
+  border-radius: 12px;
+  background: #f8fbfd;
+}
+
+.turnout-summary-grid span,
+.turnout-summary-grid strong {
+  display: block;
+}
+
+.turnout-summary-grid span {
+  margin-bottom: 0.45rem;
+  color: #718399;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.turnout-summary-grid strong {
+  color: #073f63;
+  font-size: 1.35rem;
+}
+
+.turnout-chart {
+  height: 250px;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  overflow: hidden;
+  border: 1px solid #dce7ef;
+  border-radius: 12px;
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(6 148 196 / 5%),
+      transparent
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 49px,
+      #e8f0f5 50px
+    );
+}
+
+.turnout-chart svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.turnout-chart-axis {
+  stroke: #b9cbd8;
+  stroke-width: 0.4;
+  vector-effect: non-scaling-stroke;
+}
+
+.turnout-chart-line {
+  fill: none;
+  stroke: #0795c5;
+  stroke-width: 0.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.turnout-chart-point {
+  fill: #05b889;
+  stroke: #fff;
+  stroke-width: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.turnout-series-table {
+  min-width: 720px;
+}
+
+.compact-empty-state {
+  min-height: 150px;
+  padding: 2rem;
+}
+
+.empty-state-copy {
+  margin: 0;
+  padding: 2rem 1rem;
+  color: #718399;
+  text-align: center;
+}
+
+.turnout-table {
+  min-width: 1050px;
+}
+
+.turnout-count {
+  color: #073f63;
+  font-size: 1rem;
+}
+
+.turnout-source {
+  display: inline-flex;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.turnout-source.field {
+  color: #006b91;
+  background: #d9f3fc;
+}
+
+.turnout-source.admin {
+  color: #6940aa;
+  background: #eee5ff;
+}
+
+@media (max-width: 1100px) {
+  .turnout-filters,
+  .turnout-summary-grid {
+    grid-template-columns: repeat(2, minmax(170px, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .turnout-filters,
+  .turnout-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .turnout-chart {
+    height: 190px;
+  }
+}

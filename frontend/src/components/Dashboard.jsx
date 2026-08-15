@@ -3,6 +3,7 @@ import CampaignTasksPage from './CampaignTasksPage.jsx'
 import ContactsPage from './ContactsPage.jsx'
 import GeographyPage from './GeographyPage.jsx'
 import IncidentsPage from './IncidentsPage.jsx'
+import TurnoutPage from './TurnoutPage.jsx'
 import SegmentsPage from './SegmentsPage.jsx'
 import '../App.css'
 
@@ -51,7 +52,8 @@ const navigationItems = [
   {
     label: 'Results',
     icon: '▤',
-    enabled: false,
+    permission: 'turnout.view',
+    enabled: true,
   },
   {
     label: 'Settings',
@@ -67,6 +69,7 @@ const deliveryItems = [
   'Task creation and assignment workflows',
   'Validated contact CSV import and export',
   'Offline-safe incident reporting and evidence',
+  'Offline-safe aggregate turnout reporting',
 ]
 
 function Dashboard({ user, onLogout }) {
@@ -103,6 +106,11 @@ function Dashboard({ user, onLogout }) {
       label: 'Field incidents',
       permission: 'incidents.view',
       description: 'Reports, triage, and private evidence',
+    },
+    {
+      label: 'Aggregate turnout',
+      permission: 'turnout.view',
+      description: 'Offline totals and time-series summaries',
     },
   ]
 
@@ -220,12 +228,16 @@ function Dashboard({ user, onLogout }) {
           <IncidentsPage user={user} />
         )}
 
+        {activePage === 'Results' && (
+          <TurnoutPage user={user} />
+        )}
+
         {activePage === 'Dashboard' && (
           <>
             <section className="welcome-panel">
               <div>
                 <span className="panel-badge">
-                  MT-5 Field PWA + Incidents
+                  MT-5 Field PWA + Reporting
                 </span>
                 <h3>Welcome to {user.tenant.name}</h3>
                 <p>
