@@ -159,4 +159,4 @@ class MessageDeliveryEvent extends Model
         return $message;
     }
 }
-//This creates an append-only delivery history: provider events may be created, but never edited or deleted
+// This creates an append-only delivery history: provider events may be created, but never edited or deleted

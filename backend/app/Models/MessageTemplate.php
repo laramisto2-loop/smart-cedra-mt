@@ -161,4 +161,4 @@ class MessageTemplate extends Model
         }
     }
 }
-//This establishes tenant isolation, approved channel/category/status values, creator validation, approval timestamps, audit logging, and relationships
+// This establishes tenant isolation, approved channel/category/status values, creator validation, approval timestamps, audit logging, and relationships

@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
 use App\Http\Controllers\Api\IncidentAttachmentController;
 use App\Http\Controllers\Api\IncidentController;
+use App\Http\Controllers\Api\MessageTemplateController;
+use App\Http\Controllers\Api\OutboundMessageController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
 use App\Http\Controllers\Api\SegmentController;
@@ -22,6 +24,36 @@ Route::middleware([
     'auth:sanctum',
     'tenant',
 ])->group(function (): void {
+    Route::patch(
+        'message-templates/{messageTemplate}/approve',
+        [MessageTemplateController::class, 'approve']
+    )->name('message-templates.approve');
+
+    Route::apiResource(
+        'message-templates',
+        MessageTemplateController::class
+    )->parameters([
+        'message-templates' => 'messageTemplate',
+    ]);
+
+    Route::get(
+        'outbound-messages/{outboundMessage}/delivery-events',
+        [OutboundMessageController::class, 'deliveryEvents']
+    )->name('outbound-messages.delivery-events');
+
+    Route::apiResource(
+        'outbound-messages',
+        OutboundMessageController::class
+    )
+        ->only([
+            'index',
+            'store',
+            'show',
+        ])
+        ->parameters([
+            'outbound-messages' => 'outboundMessage',
+        ]);
+
     Route::get(
         'turnout-snapshots/series',
         [TurnoutSnapshotController::class, 'series']

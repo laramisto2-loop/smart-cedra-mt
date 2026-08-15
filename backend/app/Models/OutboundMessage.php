@@ -389,4 +389,4 @@ class OutboundMessage extends Model
         }
     }
 }
-//This is the key consent-protection layer: an SMS or WhatsApp message cannot be queued unless the matching contact has granted consent for that exact channel. Suppressed attempts can still be retained as an audit record
+// This is the key consent-protection layer: an SMS or WhatsApp message cannot be queued unless the matching contact has granted consent for that exact channel. Suppressed attempts can still be retained as an audit record
