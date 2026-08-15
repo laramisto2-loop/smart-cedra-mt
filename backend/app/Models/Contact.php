@@ -148,4 +148,9 @@ class Contact extends Model
             );
         }
     }
+
+    public function outboundMessages(): HasMany
+    {
+        return $this->hasMany(OutboundMessage::class);
+    }
 }

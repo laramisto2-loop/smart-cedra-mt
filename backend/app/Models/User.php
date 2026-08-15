@@ -199,4 +199,20 @@ class User extends Authenticatable
             'reported_by_user_id'
         );
     }
+
+    public function createdMessageTemplates(): HasMany
+    {
+        return $this->hasMany(
+            MessageTemplate::class,
+            'created_by_user_id'
+        );
+    }
+
+    public function sentOutboundMessages(): HasMany
+    {
+        return $this->hasMany(
+            OutboundMessage::class,
+            'sent_by_user_id'
+        );
+    }
 }

@@ -164,6 +164,38 @@ class RbacSeeder extends Seeder
                 'name' => 'Create turnout snapshots',
                 'description' => 'Submit aggregate polling-centre and polling-station turnout counts.',
             ],
+            'messages.templates.view' => [
+                'name' => 'View message templates',
+                'description' => 'View SMS and WhatsApp templates belonging to the active tenant.',
+            ],
+            'messages.templates.create' => [
+                'name' => 'Create message templates',
+                'description' => 'Create SMS and WhatsApp templates inside the active tenant.',
+            ],
+            'messages.templates.update' => [
+                'name' => 'Update message templates',
+                'description' => 'Update message templates belonging to the active tenant.',
+            ],
+            'messages.templates.approve' => [
+                'name' => 'Approve message templates',
+                'description' => 'Approve tenant message templates for outbound use.',
+            ],
+            'messages.templates.delete' => [
+                'name' => 'Delete message templates',
+                'description' => 'Delete unused message templates belonging to the active tenant.',
+            ],
+            'messages.view' => [
+                'name' => 'View outbound messages',
+                'description' => 'View tenant outbound message records and delivery status.',
+            ],
+            'messages.send' => [
+                'name' => 'Send outbound messages',
+                'description' => 'Queue consent-aware SMS and WhatsApp messages.',
+            ],
+            'messages.delivery.view' => [
+                'name' => 'View message delivery events',
+                'description' => 'View immutable provider delivery events for tenant messages.',
+            ],
         ];
 
         $permissions = collect($permissionDefinitions)
@@ -216,6 +248,12 @@ class RbacSeeder extends Seeder
                     'incidents.attachments.manage',
                     'turnout.view',
                     'turnout.create',
+                    'messages.templates.view',
+                    'messages.templates.create',
+                    'messages.templates.update',
+                    'messages.view',
+                    'messages.send',
+                    'messages.delivery.view',
                 ],
             ],
             'field_agent' => [

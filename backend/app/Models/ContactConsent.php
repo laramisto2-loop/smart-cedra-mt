@@ -8,6 +8,7 @@ use App\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
 
 class ContactConsent extends Model
@@ -125,4 +126,13 @@ class ContactConsent extends Model
             );
         }
     }
+
+    public function outboundMessages(): HasMany
+    {
+        return $this->hasMany(
+            OutboundMessage::class,
+            'contact_consent_id'
+        );
+    }
 }
+// every messaging record can be navigated safely from its tenant, creator, sender, contact, and exact consent decision
