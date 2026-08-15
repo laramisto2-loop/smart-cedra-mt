@@ -128,6 +128,42 @@ class RbacSeeder extends Seeder
                 'name' => 'Delete campaign tasks',
                 'description' => 'Delete campaign tasks belonging to the active tenant.',
             ],
+            'incidents.view' => [
+                'name' => 'View incidents',
+                'description' => 'View incident reports accessible to the active tenant user.',
+            ],
+            'incidents.create' => [
+                'name' => 'Create incidents',
+                'description' => 'Submit incident reports inside the active tenant.',
+            ],
+            'incidents.update' => [
+                'name' => 'Update incidents',
+                'description' => 'Update accessible incident details before or during review.',
+            ],
+            'incidents.assign' => [
+                'name' => 'Assign incidents',
+                'description' => 'Assign tenant incidents to operational reviewers.',
+            ],
+            'incidents.review' => [
+                'name' => 'Review incidents',
+                'description' => 'Review, resolve, or dismiss tenant incident reports.',
+            ],
+            'incidents.attachments.manage' => [
+                'name' => 'Manage incident attachments',
+                'description' => 'Upload and remove attachments belonging to accessible incidents.',
+            ],
+            'incidents.delete' => [
+                'name' => 'Delete incidents',
+                'description' => 'Delete incident reports belonging to the active tenant.',
+            ],
+            'turnout.view' => [
+                'name' => 'View turnout snapshots',
+                'description' => 'View aggregate turnout snapshots belonging to the active tenant.',
+            ],
+            'turnout.create' => [
+                'name' => 'Create turnout snapshots',
+                'description' => 'Submit aggregate polling-centre and polling-station turnout counts.',
+            ],
         ];
 
         $permissions = collect($permissionDefinitions)
@@ -172,6 +208,14 @@ class RbacSeeder extends Seeder
                     'tasks.update',
                     'tasks.assign',
                     'tasks.complete',
+                    'incidents.view',
+                    'incidents.create',
+                    'incidents.update',
+                    'incidents.assign',
+                    'incidents.review',
+                    'incidents.attachments.manage',
+                    'turnout.view',
+                    'turnout.create',
                 ],
             ],
             'field_agent' => [
@@ -181,6 +225,12 @@ class RbacSeeder extends Seeder
                     'geography.view',
                     'tasks.view',
                     'tasks.complete',
+                    'incidents.view',
+                    'incidents.create',
+                    'incidents.update',
+                    'incidents.attachments.manage',
+                    'turnout.view',
+                    'turnout.create',
                 ],
             ],
         ];

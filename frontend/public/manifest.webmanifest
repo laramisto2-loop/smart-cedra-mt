@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "ElectoFlow Field Operations",
+  "short_name": "ElectoFlow",
+  "description": "Tenant-safe campaign operations, assignments, and field incident reporting.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2f7fb",
+  "theme_color": "#063f63",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/electoflow-pwa.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

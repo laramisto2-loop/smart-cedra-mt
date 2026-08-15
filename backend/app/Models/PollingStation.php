@@ -8,6 +8,7 @@ use App\Models\Concerns\EnsuresParentBelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PollingStation extends Model
 {
@@ -40,6 +41,11 @@ class PollingStation extends Model
         return $this->belongsTo(PollingCenter::class);
     }
 
+    public function incidents(): HasMany
+    {
+        return $this->hasMany(Incident::class);
+    }
+
     protected function tenantParentClass(): string
     {
         return PollingCenter::class;
@@ -48,6 +54,11 @@ class PollingStation extends Model
     protected function tenantParentForeignKey(): string
     {
         return 'polling_center_id';
+    }
+
+    public function turnoutSnapshots(): HasMany
+    {
+        return $this->hasMany(TurnoutSnapshot::class);
     }
 }
 
