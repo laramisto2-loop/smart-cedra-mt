@@ -211,4 +211,12 @@ class CampaignTask extends Model
             );
         }
     }
+
+    public function callAttempts(): HasMany
+    {
+        return $this->hasMany(
+            CallAttempt::class,
+            'follow_up_task_id'
+        );
+    }
 }

@@ -149,6 +149,11 @@ class Contact extends Model
         }
     }
 
+    public function callAssignments(): HasMany
+    {
+        return $this->hasMany(CallAssignment::class);
+    }
+
     public function outboundMessages(): HasMany
     {
         return $this->hasMany(OutboundMessage::class);

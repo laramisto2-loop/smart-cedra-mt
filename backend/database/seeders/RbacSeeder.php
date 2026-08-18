@@ -196,6 +196,66 @@ class RbacSeeder extends Seeder
                 'name' => 'View message delivery events',
                 'description' => 'View immutable provider delivery events for tenant messages.',
             ],
+            'calls.scripts.view' => [
+                'name' => 'View call scripts',
+                'description' => 'View call-center scripts belonging to the active tenant.',
+            ],
+            'calls.scripts.create' => [
+                'name' => 'Create call scripts',
+                'description' => 'Create call-center scripts inside the active tenant.',
+            ],
+            'calls.scripts.update' => [
+                'name' => 'Update call scripts',
+                'description' => 'Update draft and archived call scripts belonging to the active tenant.',
+            ],
+            'calls.scripts.activate' => [
+                'name' => 'Activate call scripts',
+                'description' => 'Activate or archive tenant call-center scripts.',
+            ],
+            'calls.scripts.delete' => [
+                'name' => 'Delete call scripts',
+                'description' => 'Delete unused call-center scripts belonging to the active tenant.',
+            ],
+            'calls.queues.view' => [
+                'name' => 'View call queues',
+                'description' => 'View call queues belonging to the active tenant.',
+            ],
+            'calls.queues.create' => [
+                'name' => 'Create call queues',
+                'description' => 'Create organized calling campaigns inside the active tenant.',
+            ],
+            'calls.queues.update' => [
+                'name' => 'Update call queues',
+                'description' => 'Update tenant call queues and their workflow status.',
+            ],
+            'calls.queues.assign' => [
+                'name' => 'Assign call queues',
+                'description' => 'Assign tenant contacts and agents to call queues.',
+            ],
+            'calls.queues.delete' => [
+                'name' => 'Delete call queues',
+                'description' => 'Delete unused call queues belonging to the active tenant.',
+            ],
+            'calls.assignments.view' => [
+                'name' => 'View call assignments',
+                'description' => 'View call assignments accessible to the active tenant user.',
+            ],
+            'calls.assignments.claim' => [
+                'name' => 'Claim call assignments',
+                'description' => 'Claim accessible pending call assignments for call-center work.',
+            ],
+            'calls.assignments.update' => [
+                'name' => 'Update call assignments',
+                'description' => 'Update accessible call assignments and their workflow status.',
+            ],
+            'calls.attempts.view' => [
+                'name' => 'View call attempts',
+                'description' => 'View immutable call-attempt history accessible to the active tenant user.',
+            ],
+            'calls.attempts.create' => [
+                'name' => 'Record call attempts',
+                'description' => 'Record call outcomes, notes, durations, and callback requirements.',
+            ],
         ];
 
         $permissions = collect($permissionDefinitions)
@@ -254,6 +314,18 @@ class RbacSeeder extends Seeder
                     'messages.view',
                     'messages.send',
                     'messages.delivery.view',
+                    'calls.scripts.view',
+                    'calls.scripts.create',
+                    'calls.scripts.update',
+                    'calls.queues.view',
+                    'calls.queues.create',
+                    'calls.queues.update',
+                    'calls.queues.assign',
+                    'calls.assignments.view',
+                    'calls.assignments.claim',
+                    'calls.assignments.update',
+                    'calls.attempts.view',
+                    'calls.attempts.create',
                 ],
             ],
             'field_agent' => [
@@ -269,6 +341,11 @@ class RbacSeeder extends Seeder
                     'incidents.attachments.manage',
                     'turnout.view',
                     'turnout.create',
+                    'calls.assignments.view',
+                    'calls.assignments.claim',
+                    'calls.assignments.update',
+                    'calls.attempts.view',
+                    'calls.attempts.create',
                 ],
             ],
         ];
