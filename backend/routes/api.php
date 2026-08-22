@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\CallAssignmentController;
+use App\Http\Controllers\Api\CallAttemptController;
+use App\Http\Controllers\Api\CallQueueController;
+use App\Http\Controllers\Api\CallScriptController;
 use App\Http\Controllers\Api\CampaignTaskController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactInteractionController;
@@ -24,6 +28,61 @@ Route::middleware([
     'auth:sanctum',
     'tenant',
 ])->group(function (): void {
+    Route::patch(
+        'call-scripts/{callScript}/activate',
+        [CallScriptController::class, 'activate']
+    )->name('call-scripts.activate');
+
+    Route::apiResource(
+        'call-scripts',
+        CallScriptController::class
+    )->parameters([
+        'call-scripts' => 'callScript',
+    ]);
+
+    Route::post(
+        'call-queues/{callQueue}/assign',
+        [CallQueueController::class, 'assign']
+    )->name('call-queues.assign');
+
+    Route::apiResource(
+        'call-queues',
+        CallQueueController::class
+    )->parameters([
+        'call-queues' => 'callQueue',
+    ]);
+
+    Route::patch(
+        'call-assignments/{callAssignment}/claim',
+        [CallAssignmentController::class, 'claim']
+    )->name('call-assignments.claim');
+
+    Route::apiResource(
+        'call-assignments',
+        CallAssignmentController::class
+    )
+        ->only([
+            'index',
+            'show',
+            'update',
+        ])
+        ->parameters([
+            'call-assignments' => 'callAssignment',
+        ]);
+
+    Route::apiResource(
+        'call-attempts',
+        CallAttemptController::class
+    )
+        ->only([
+            'index',
+            'store',
+            'show',
+        ])
+        ->parameters([
+            'call-attempts' => 'callAttempt',
+        ]);
+
     Route::patch(
         'message-templates/{messageTemplate}/approve',
         [MessageTemplateController::class, 'approve']
