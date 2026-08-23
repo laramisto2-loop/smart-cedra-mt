@@ -107,8 +107,16 @@ class CallAssignmentController extends Controller
             ->when(
                 ! $this->mayManageAssignments($user),
                 fn ($query) => $query->where(
-                    'assigned_to_user_id',
-                    $user->id
+                    fn ($ownershipQuery) => $ownershipQuery
+                        ->where(
+                            'assigned_to_user_id',
+                            $user->id
+                        )
+                        ->orWhere(
+                            fn ($unassignedQuery) => $unassignedQuery
+                                ->whereNull('assigned_to_user_id')
+                                ->where('status', 'pending')
+                        )
                 )
             )
             ->when(
@@ -328,7 +336,7 @@ class CallAssignmentController extends Controller
     ): CallAssignment {
         return $callAssignment
             ->load([
-                'callQueue',
+                'callQueue.callScript',
                 'contact',
                 'assignee',
                 'assigner',

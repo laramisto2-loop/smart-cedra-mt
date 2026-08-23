@@ -344,8 +344,8 @@ class RbacSeeder extends Seeder
                     'calls.assignments.view',
                     'calls.assignments.claim',
                     'calls.assignments.update',
-                    'calls.attempts.view',
                     'calls.attempts.create',
+                    'calls.attempts.view',
                 ],
             ],
         ];

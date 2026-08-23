@@ -7,6 +7,7 @@ import MessagingPage from './MessagingPage.jsx'
 import TurnoutPage from './TurnoutPage.jsx'
 import SegmentsPage from './SegmentsPage.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
+import CallCenterPage from './CallCenterPage.jsx'
 import { countQueuedIncidents } from '../services/incidentQueue.js'
 import { countQueuedTurnoutSnapshots } from '../services/turnoutQueue.js'
 import '../App.css'
@@ -66,6 +67,12 @@ const navigationItems = [
     enabled: true,
   },
   {
+    label: 'Call Center',
+    icon: '☎',
+    permission: 'calls.assignments.view',
+    enabled: true,
+  },
+  {
     label: 'Settings',
     icon: '⚙',
     enabled: false,
@@ -83,6 +90,8 @@ const deliveryItems = [
   'Approved WhatsApp and SMS template workflows',
   'Consent-aware outbound message processing',
   'Quiet-hours scheduling and delivery history',
+  'Tenant-safe call scripts and campaign queues',
+  'Agent assignment and immutable call history',
 ]
 
 function Dashboard({ user, onLogout }) {
@@ -132,6 +141,12 @@ function Dashboard({ user, onLogout }) {
       permission: 'messages.view',
       description:
         'Consent checks, templates, and delivery tracking',
+    },
+    {
+      label: 'Call center',
+      permission: 'calls.assignments.view',
+      description:
+        'Scripts, queues, assignments, and call outcomes',
     },
   ]
 
@@ -291,6 +306,10 @@ const logoutMessage =
 
         {activePage === 'Messaging' && (
           <MessagingPage user={user} />
+        )}
+
+        {activePage === 'Call Center' && (
+          <CallCenterPage user={user} />
         )}
 
         {activePage === 'Dashboard' && (

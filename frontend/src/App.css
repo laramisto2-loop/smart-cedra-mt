@@ -3127,3 +3127,194 @@
     flex-direction: column;
   }
 }
+/* Call center */
+
+.modal-card-wide {
+  width: min(100%, 920px);
+}
+
+.assignment-contact-list {
+  max-height: 280px;
+  padding: 0.35rem;
+  display: grid;
+  gap: 0.5rem;
+  overflow-y: auto;
+  border: 1px solid #d7e2ec;
+  border-radius: 10px;
+  background: #f8fbfd;
+}
+
+.assignment-contact-option {
+  padding: 0.8rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border: 1px solid #e1eaf1;
+  border-radius: 9px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.assignment-contact-option:hover {
+  border-color: #79c8e8;
+  background: #f1faff;
+}
+
+.assignment-contact-option input {
+  margin-top: 0.2rem;
+  flex: 0 0 auto;
+}
+
+.assignment-contact-option strong,
+.assignment-contact-option span {
+  display: block;
+}
+
+.assignment-contact-option strong {
+  color: #173b59;
+  font-size: 0.85rem;
+}
+
+.assignment-contact-option span {
+  margin-top: 0.2rem;
+  color: #718399;
+  font-size: 0.75rem;
+}
+
+.incident-badge-row {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.incident-detail-card {
+  padding: 0.85rem;
+  border: 1px solid #e2ebf2;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.incident-detail-card span,
+.incident-detail-card strong,
+.incident-detail-card small {
+  display: block;
+}
+
+.incident-detail-card span {
+  margin-bottom: 0.3rem;
+  color: #718399;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.incident-detail-card strong {
+  color: #173b59;
+  font-size: 0.85rem;
+}
+
+.incident-detail-card small {
+  margin-top: 0.25rem;
+  color: #718399;
+  font-size: 0.72rem;
+}
+
+.incident-description-card {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #dce7ef;
+  border-radius: 12px;
+  background: #f8fbfd;
+}
+
+.incident-description-card h3 {
+  margin: 0 0 0.5rem;
+  color: #173b59;
+  font-size: 0.9rem;
+}
+
+.incident-description-card p {
+  margin: 0;
+  color: #425d75;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.details-section-heading {
+  margin: 1.5rem 0 1rem;
+  padding-top: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid #e2ebf2;
+}
+
+.details-section-heading h3 {
+  margin: 0;
+  color: #173b59;
+  font-size: 1rem;
+}
+
+.details-section-heading > span {
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  color: #00745b;
+  background: #d1f5e9;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.message-status-pill.pending,
+.message-status-pill.normal {
+  color: #8a5b00;
+  background: #fff0c9;
+}
+
+.message-status-pill.in_progress {
+  color: #075985;
+  background: #dff3fc;
+}
+
+.message-status-pill.completed {
+  color: #00745b;
+  background: #d1f5e9;
+}
+
+.message-status-pill.skipped,
+.message-status-pill.low,
+.message-status-pill.no_answer,
+.message-status-pill.voicemail {
+  color: #586a7d;
+  background: #e8edf2;
+}
+
+.message-status-pill.high,
+.message-status-pill.busy,
+.message-status-pill.callback_requested {
+  color: #9a5500;
+  background: #ffedcc;
+}
+
+.message-status-pill.urgent,
+.message-status-pill.wrong_number,
+.message-status-pill.declined {
+  color: #b42318;
+  background: #fee4e2;
+}
+
+@media (max-width: 700px) {
+  .details-section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+.call-script-body {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.7;
+}

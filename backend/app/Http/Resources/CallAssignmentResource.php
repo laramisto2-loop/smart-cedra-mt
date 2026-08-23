@@ -39,6 +39,19 @@ class CallAssignmentResource extends JsonResource
                         'code' => $this->callQueue->code,
                         'priority' => $this->callQueue->priority,
                         'status' => $this->callQueue->status,
+                        'call_script' => (
+                            $this->callQueue->relationLoaded('callScript')
+                            && $this->callQueue->callScript !== null
+                        )
+                            ? [
+                                'id' => $this->callQueue->callScript->id,
+                                'name' => $this->callQueue->callScript->name,
+                                'code' => $this->callQueue->callScript->code,
+                                'language_code' => $this->callQueue->callScript->language_code,
+                                'body' => $this->callQueue->callScript->body,
+                                'status' => $this->callQueue->callScript->status,
+                            ]
+                            : null,
                     ];
                 }
             ),

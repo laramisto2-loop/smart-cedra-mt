@@ -442,11 +442,7 @@ class CallCenterApiTest extends TestCase
         $listResponse = $this->actingAs($fieldAgent)
             ->getJson('/api/call-assignments')
             ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath(
-                'data.0.id',
-                $ownAssignment->id
-            );
+            ->assertJsonCount(2, 'data');
 
         $visibleIds = collect(
             $listResponse->json('data')
@@ -460,10 +456,9 @@ class CallCenterApiTest extends TestCase
             $visibleIds->contains($otherAssignment->id)
         );
 
-        $this->assertFalse(
+        $this->assertTrue(
             $visibleIds->contains($unassigned->id)
         );
-
         $this->actingAs($fieldAgent)
             ->getJson(
                 "/api/call-assignments/{$otherAssignment->id}"
