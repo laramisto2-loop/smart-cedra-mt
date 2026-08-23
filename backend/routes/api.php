@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\CallAssignmentController;
+use App\Http\Controllers\Api\CallAttemptController;
+use App\Http\Controllers\Api\CallQueueController;
+use App\Http\Controllers\Api\CallScriptController;
 use App\Http\Controllers\Api\CampaignTaskController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactInteractionController;
@@ -11,6 +15,8 @@ use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
 use App\Http\Controllers\Api\IncidentAttachmentController;
 use App\Http\Controllers\Api\IncidentController;
+use App\Http\Controllers\Api\MessageTemplateController;
+use App\Http\Controllers\Api\OutboundMessageController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
 use App\Http\Controllers\Api\SegmentController;
@@ -22,6 +28,91 @@ Route::middleware([
     'auth:sanctum',
     'tenant',
 ])->group(function (): void {
+    Route::patch(
+        'call-scripts/{callScript}/activate',
+        [CallScriptController::class, 'activate']
+    )->name('call-scripts.activate');
+
+    Route::apiResource(
+        'call-scripts',
+        CallScriptController::class
+    )->parameters([
+        'call-scripts' => 'callScript',
+    ]);
+
+    Route::post(
+        'call-queues/{callQueue}/assign',
+        [CallQueueController::class, 'assign']
+    )->name('call-queues.assign');
+
+    Route::apiResource(
+        'call-queues',
+        CallQueueController::class
+    )->parameters([
+        'call-queues' => 'callQueue',
+    ]);
+
+    Route::patch(
+        'call-assignments/{callAssignment}/claim',
+        [CallAssignmentController::class, 'claim']
+    )->name('call-assignments.claim');
+
+    Route::apiResource(
+        'call-assignments',
+        CallAssignmentController::class
+    )
+        ->only([
+            'index',
+            'show',
+            'update',
+        ])
+        ->parameters([
+            'call-assignments' => 'callAssignment',
+        ]);
+
+    Route::apiResource(
+        'call-attempts',
+        CallAttemptController::class
+    )
+        ->only([
+            'index',
+            'store',
+            'show',
+        ])
+        ->parameters([
+            'call-attempts' => 'callAttempt',
+        ]);
+
+    Route::patch(
+        'message-templates/{messageTemplate}/approve',
+        [MessageTemplateController::class, 'approve']
+    )->name('message-templates.approve');
+
+    Route::apiResource(
+        'message-templates',
+        MessageTemplateController::class
+    )->parameters([
+        'message-templates' => 'messageTemplate',
+    ]);
+
+    Route::get(
+        'outbound-messages/{outboundMessage}/delivery-events',
+        [OutboundMessageController::class, 'deliveryEvents']
+    )->name('outbound-messages.delivery-events');
+
+    Route::apiResource(
+        'outbound-messages',
+        OutboundMessageController::class
+    )
+        ->only([
+            'index',
+            'store',
+            'show',
+        ])
+        ->parameters([
+            'outbound-messages' => 'outboundMessage',
+        ]);
+
     Route::get(
         'turnout-snapshots/series',
         [TurnoutSnapshotController::class, 'series']

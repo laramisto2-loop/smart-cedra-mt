@@ -3,8 +3,13 @@ import CampaignTasksPage from './CampaignTasksPage.jsx'
 import ContactsPage from './ContactsPage.jsx'
 import GeographyPage from './GeographyPage.jsx'
 import IncidentsPage from './IncidentsPage.jsx'
+import MessagingPage from './MessagingPage.jsx'
 import TurnoutPage from './TurnoutPage.jsx'
 import SegmentsPage from './SegmentsPage.jsx'
+import ConfirmDialog from './ConfirmDialog.jsx'
+import CallCenterPage from './CallCenterPage.jsx'
+import { countQueuedIncidents } from '../services/incidentQueue.js'
+import { countQueuedTurnoutSnapshots } from '../services/turnoutQueue.js'
 import '../App.css'
 
 const navigationItems = [
@@ -56,6 +61,18 @@ const navigationItems = [
     enabled: true,
   },
   {
+    label: 'Messaging',
+    icon: '✉',
+    permission: 'messages.view',
+    enabled: true,
+  },
+  {
+    label: 'Call Center',
+    icon: '☎',
+    permission: 'calls.assignments.view',
+    enabled: true,
+  },
+  {
     label: 'Settings',
     icon: '⚙',
     enabled: false,
@@ -70,10 +87,17 @@ const deliveryItems = [
   'Validated contact CSV import and export',
   'Offline-safe incident reporting and evidence',
   'Offline-safe aggregate turnout reporting',
+  'Approved WhatsApp and SMS template workflows',
+  'Consent-aware outbound message processing',
+  'Quiet-hours scheduling and delivery history',
+  'Tenant-safe call scripts and campaign queues',
+  'Agent assignment and immutable call history',
 ]
 
 function Dashboard({ user, onLogout }) {
   const [activePage, setActivePage] = useState('Dashboard')
+  const [logoutConfirmation, setLogoutConfirmation] =
+  useState(null)
   const permissions = user.permissions ?? []
 
   const visibleNavigationItems = navigationItems.filter(
@@ -112,6 +136,18 @@ function Dashboard({ user, onLogout }) {
       permission: 'turnout.view',
       description: 'Offline totals and time-series summaries',
     },
+    {
+      label: 'Campaign messaging',
+      permission: 'messages.view',
+      description:
+        'Consent checks, templates, and delivery tracking',
+    },
+    {
+      label: 'Call center',
+      permission: 'calls.assignments.view',
+      description:
+        'Scripts, queues, assignments, and call outcomes',
+    },
   ]
 
   const initials = user.name
@@ -130,6 +166,40 @@ function Dashboard({ user, onLogout }) {
       setActivePage(item.label)
     }
   }
+
+  async function requestLogout() {
+  let incidentCount = 0
+  let turnoutCount = 0
+
+  try {
+    ;[incidentCount, turnoutCount] = await Promise.all([
+      countQueuedIncidents(user),
+      countQueuedTurnoutSnapshots(user),
+    ])
+  } catch {
+    // Sign-out confirmation can still be displayed if
+    // browser storage is temporarily unavailable.
+  }
+
+  setLogoutConfirmation({
+    incidentCount,
+    turnoutCount,
+  })
+}
+
+const queuedOfflineItems = logoutConfirmation
+  ? logoutConfirmation.incidentCount +
+    logoutConfirmation.turnoutCount
+  : 0
+
+const logoutMessage =
+  queuedOfflineItems > 0
+    ? `You have ${queuedOfflineItems} offline ${
+        queuedOfflineItems === 1 ? 'entry' : 'entries'
+      } waiting to synchronize. ${
+        queuedOfflineItems === 1 ? 'It will' : 'They will'
+      } remain safely stored for this account after you sign out.`
+    : 'Are you sure you want to sign out of ElectoFlow?'
 
   return (
     <div className="admin-layout">
@@ -186,7 +256,9 @@ function Dashboard({ user, onLogout }) {
       <main className="main-content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Tenant administration</p>
+            <p className="eyebrow">
+              Tenant administration
+            </p>
             <h2>{activePage}</h2>
           </div>
 
@@ -201,7 +273,7 @@ function Dashboard({ user, onLogout }) {
             <button
               type="button"
               className="secondary-button"
-              onClick={onLogout}
+              onClick={requestLogout}
             >
               Sign out
             </button>
@@ -232,18 +304,27 @@ function Dashboard({ user, onLogout }) {
           <TurnoutPage user={user} />
         )}
 
+        {activePage === 'Messaging' && (
+          <MessagingPage user={user} />
+        )}
+
+        {activePage === 'Call Center' && (
+          <CallCenterPage user={user} />
+        )}
+
         {activePage === 'Dashboard' && (
           <>
             <section className="welcome-panel">
               <div>
                 <span className="panel-badge">
-                  MT-5 Field PWA + Reporting
+                  MT-6 Messaging + Call Center
                 </span>
                 <h3>Welcome to {user.tenant.name}</h3>
                 <p>
                   Manage tenant-isolated contacts, audiences,
-                  assignments, and field incident reports from one
-                  protected workspace.
+                  field operations, turnout reporting, and
+                  consent-aware campaign communications from
+                  one protected workspace.
                 </p>
               </div>
 
@@ -326,14 +407,16 @@ function Dashboard({ user, onLogout }) {
                     <p className="eyebrow">
                       Implementation progress
                     </p>
-                    <h3>MT-5 delivery</h3>
+                    <h3>MT-6 delivery</h3>
                   </div>
                 </div>
 
                 <ul className="progress-list">
                   {deliveryItems.map((item) => (
                     <li key={item}>
-                      <span className="progress-check">✓</span>
+                      <span className="progress-check">
+                        ✓
+                      </span>
                       {item}
                     </li>
                   ))}
@@ -343,6 +426,17 @@ function Dashboard({ user, onLogout }) {
           </>
         )}
       </main>
+      {logoutConfirmation && (
+        <ConfirmDialog
+          title="Sign out?"
+          message={logoutMessage}
+          confirmLabel="Sign out"
+          confirmingLabel="Signing out..."
+          errorMessage="You could not be signed out. Please try again."
+          onConfirm={onLogout}
+          onCancel={() => setLogoutConfirmation(null)}
+        />
+)}
     </div>
   )
 }

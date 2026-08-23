@@ -199,4 +199,60 @@ class User extends Authenticatable
             'reported_by_user_id'
         );
     }
+
+    public function createdMessageTemplates(): HasMany
+    {
+        return $this->hasMany(
+            MessageTemplate::class,
+            'created_by_user_id'
+        );
+    }
+
+    public function sentOutboundMessages(): HasMany
+    {
+        return $this->hasMany(
+            OutboundMessage::class,
+            'sent_by_user_id'
+        );
+    }
+
+    public function createdCallScripts(): HasMany
+    {
+        return $this->hasMany(
+            CallScript::class,
+            'created_by_user_id'
+        );
+    }
+
+    public function createdCallQueues(): HasMany
+    {
+        return $this->hasMany(
+            CallQueue::class,
+            'created_by_user_id'
+        );
+    }
+
+    public function callAssignments(): HasMany
+    {
+        return $this->hasMany(
+            CallAssignment::class,
+            'assigned_to_user_id'
+        );
+    }
+
+    public function assignedCallAssignments(): HasMany
+    {
+        return $this->hasMany(
+            CallAssignment::class,
+            'assigned_by_user_id'
+        );
+    }
+
+    public function performedCallAttempts(): HasMany
+    {
+        return $this->hasMany(
+            CallAttempt::class,
+            'performed_by_user_id'
+        );
+    }
 }
