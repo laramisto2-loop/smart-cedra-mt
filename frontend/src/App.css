@@ -3318,3 +3318,159 @@
   white-space: pre-wrap;
   line-height: 1.7;
 }
+
+.management-page,
+.management-panel {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.management-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.5fr);
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.management-table {
+  min-width: 900px;
+}
+
+.role-selection-fieldset,
+.permission-fieldset {
+  margin: 1rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.role-selection-fieldset legend,
+.permission-fieldset legend {
+  margin-bottom: 0.35rem;
+  color: #002f50;
+  font-weight: 700;
+}
+
+.role-selection-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.role-selection-option,
+.permission-option {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.8rem;
+  border: 1px solid #cfe0ec;
+  border-radius: 0.65rem;
+  background: #f8fbfd;
+  cursor: pointer;
+}
+
+.role-selection-option:hover,
+.permission-option:hover {
+  border-color: #66b9dc;
+  background: #f0f9fd;
+}
+
+.role-selection-option input,
+.permission-option input {
+  width: auto;
+  margin-top: 0.2rem;
+  accent-color: #008dbd;
+}
+
+.role-selection-option span,
+.permission-option span {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.role-selection-option small,
+.permission-option small {
+  color: #58748d;
+  font-size: 0.76rem;
+}
+
+.permission-groups {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.8rem;
+}
+
+.permission-group {
+  padding: 0.9rem;
+  border: 1px solid #d7e4ed;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.permission-group h4 {
+  margin: 0 0 0.7rem;
+  color: #003858;
+  font-size: 0.9rem;
+}
+
+.permission-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.role-form-modal {
+  width: min(760px, calc(100vw - 2rem));
+}
+
+.role-pill-list,
+.permission-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.role-pill,
+.current-user-pill,
+.system-role-pill,
+.custom-role-pill,
+.permission-summary span {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.role-pill {
+  color: #005c78;
+  background: #d6f4fd;
+}
+
+.current-user-pill {
+  margin-top: 0.35rem;
+  color: #006c56;
+  background: #cdf7ea;
+}
+
+.system-role-pill {
+  color: #654100;
+  background: #ffebbf;
+}
+
+.custom-role-pill {
+  color: #643b8c;
+  background: #eedcff;
+}
+
+.permission-summary span {
+  color: #355972;
+  background: #edf4f8;
+}
+
+@media (max-width: 760px) {
+  .management-filters,
+  .permission-options {
+    grid-template-columns: 1fr;
+  }
+}

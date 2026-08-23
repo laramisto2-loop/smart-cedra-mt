@@ -8,6 +8,7 @@ import TurnoutPage from './TurnoutPage.jsx'
 import SegmentsPage from './SegmentsPage.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
 import CallCenterPage from './CallCenterPage.jsx'
+import UserRoleManagementPage from './UserRoleManagementPage.jsx'
 import { countQueuedIncidents } from '../services/incidentQueue.js'
 import { countQueuedTurnoutSnapshots } from '../services/turnoutQueue.js'
 import '../App.css'
@@ -22,7 +23,7 @@ const navigationItems = [
     label: 'Users',
     icon: '👥',
     permission: 'users.manage',
-    enabled: false,
+    enabled: true,
   },
   {
     label: 'Geography',
@@ -302,6 +303,10 @@ const logoutMessage =
 
         {activePage === 'Results' && (
           <TurnoutPage user={user} />
+        )}
+
+        {activePage === 'Users' && (
+          <UserRoleManagementPage user={user} />
         )}
 
         {activePage === 'Messaging' && (
