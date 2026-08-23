@@ -19,8 +19,10 @@ use App\Http\Controllers\Api\MessageTemplateController;
 use App\Http\Controllers\Api\OutboundMessageController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SegmentController;
 use App\Http\Controllers\Api\TurnoutSnapshotController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +30,31 @@ Route::middleware([
     'auth:sanctum',
     'tenant',
 ])->group(function (): void {
+    Route::patch(
+        'users/{user}/roles',
+        [UserController::class, 'syncRoles']
+    )->name('users.roles.sync');
+
+    Route::apiResource(
+        'users',
+        UserController::class
+    );
+
+    // This static route must remain before the roles resource route.
+    Route::get(
+        'roles/permissions',
+        [RoleController::class, 'permissions']
+    )->name('roles.permissions.index');
+
+    Route::patch(
+        'roles/{role}/permissions',
+        [RoleController::class, 'syncPermissions']
+    )->name('roles.permissions.sync');
+
+    Route::apiResource(
+        'roles',
+        RoleController::class
+    );
     Route::patch(
         'call-scripts/{callScript}/activate',
         [CallScriptController::class, 'activate']
