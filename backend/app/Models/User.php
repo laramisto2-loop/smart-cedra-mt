@@ -255,4 +255,60 @@ class User extends Authenticatable
             'performed_by_user_id'
         );
     }
+
+    public function createdElectionContests(): HasMany
+    {
+        return $this->hasMany(
+            ElectionContest::class,
+            'created_by_user_id'
+        );
+    }
+
+    public function activatedElectionContests(): HasMany
+    {
+        return $this->hasMany(
+            ElectionContest::class,
+            'activated_by_user_id'
+        );
+    }
+
+    public function createdTallySheets(): HasMany
+    {
+        return $this->hasMany(
+            TallySheet::class,
+            'created_by_user_id'
+        );
+    }
+
+    public function reviewedTallySheets(): HasMany
+    {
+        return $this->hasMany(
+            TallySheet::class,
+            'reviewed_by_user_id'
+        );
+    }
+
+    public function approvedTallySheets(): HasMany
+    {
+        return $this->hasMany(
+            TallySheet::class,
+            'approved_by_user_id'
+        );
+    }
+
+    public function enteredTallySubmissions(): HasMany
+    {
+        return $this->hasMany(
+            TallySubmission::class,
+            'entered_by_user_id'
+        );
+    }
+
+    public function uploadedTallySheetAttachments(): HasMany
+    {
+        return $this->hasMany(
+            TallySheetAttachment::class,
+            'uploaded_by_user_id'
+        );
+    }
 }

@@ -136,6 +136,36 @@ class Tenant extends Model
     {
         return $this->hasMany(CallAttempt::class);
     }
+
+    public function electionContests(): HasMany
+    {
+        return $this->hasMany(ElectionContest::class);
+    }
+
+    public function electionOptions(): HasMany
+    {
+        return $this->hasMany(ElectionOption::class);
+    }
+
+    public function tallySheets(): HasMany
+    {
+        return $this->hasMany(TallySheet::class);
+    }
+
+    public function tallySubmissions(): HasMany
+    {
+        return $this->hasMany(TallySubmission::class);
+    }
+
+    public function tallyResults(): HasMany
+    {
+        return $this->hasMany(TallyResult::class);
+    }
+
+    public function tallySheetAttachments(): HasMany
+    {
+        return $this->hasMany(TallySheetAttachment::class);
+    }
 }
 
 // This lets us retrieve geography directly from a tenant:

@@ -256,6 +256,62 @@ class RbacSeeder extends Seeder
                 'name' => 'Record call attempts',
                 'description' => 'Record call outcomes, notes, durations, and callback requirements.',
             ],
+            'results.contests.view' => [
+                'name' => 'View election contests',
+                'description' => 'View election contests and options belonging to the active tenant.',
+            ],
+            'results.contests.create' => [
+                'name' => 'Create election contests',
+                'description' => 'Create election contests and their options inside the active tenant.',
+            ],
+            'results.contests.update' => [
+                'name' => 'Update election contests',
+                'description' => 'Update draft election contests and their options.',
+            ],
+            'results.contests.activate' => [
+                'name' => 'Activate election contests',
+                'description' => 'Activate or close tenant election contests.',
+            ],
+            'results.contests.delete' => [
+                'name' => 'Delete election contests',
+                'description' => 'Delete unused draft election contests.',
+            ],
+            'results.tallies.view' => [
+                'name' => 'View tally sheets',
+                'description' => 'View tally sheets and submissions accessible to the active tenant user.',
+            ],
+            'results.tallies.create' => [
+                'name' => 'Create tally sheets',
+                'description' => 'Create polling-station tally sheets inside the active tenant.',
+            ],
+            'results.tallies.update' => [
+                'name' => 'Update tally sheets',
+                'description' => 'Update accessible tally sheets before approval.',
+            ],
+            'results.tallies.submit' => [
+                'name' => 'Submit tally entries',
+                'description' => 'Record and submit independently entered tally results.',
+            ],
+            'results.tallies.review' => [
+                'name' => 'Review tally sheets',
+                'description' => 'Review double-entry comparisons and resolve tally discrepancies.',
+            ],
+            'results.tallies.approve' => [
+                'name' => 'Approve tally sheets',
+                'description' => 'Approve or reject reviewed tally sheets.',
+            ],
+            'results.attachments.manage' => [
+                'name' => 'Manage tally attachments',
+                'description' => 'Upload and remove evidence belonging to accessible tally sheets.',
+            ],
+            'results.analytics.view' => [
+                'name' => 'View results analytics',
+                'description' => 'View approved election results and analytics dashboards.',
+            ],
+            'results.exports.create' => [
+                'name' => 'Export election results',
+                'description' => 'Generate exports from approved election results.',
+            ],
         ];
 
         $permissions = collect($permissionDefinitions)
@@ -326,6 +382,17 @@ class RbacSeeder extends Seeder
                     'calls.assignments.update',
                     'calls.attempts.view',
                     'calls.attempts.create',
+                    'results.contests.view',
+                    'results.contests.create',
+                    'results.contests.update',
+                    'results.tallies.view',
+                    'results.tallies.create',
+                    'results.tallies.update',
+                    'results.tallies.submit',
+                    'results.tallies.review',
+                    'results.attachments.manage',
+                    'results.analytics.view',
+                    'results.exports.create',
                 ],
             ],
             'field_agent' => [
@@ -346,6 +413,12 @@ class RbacSeeder extends Seeder
                     'calls.assignments.update',
                     'calls.attempts.create',
                     'calls.attempts.view',
+                    'results.contests.view',
+                    'results.tallies.view',
+                    'results.tallies.create',
+                    'results.tallies.update',
+                    'results.tallies.submit',
+                    'results.attachments.manage',
                 ],
             ],
         ];
