@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactInteractionController;
 use App\Http\Controllers\Api\ContactTransferController;
 use App\Http\Controllers\Api\DistrictController;
+use App\Http\Controllers\Api\ElectionContestController;
 use App\Http\Controllers\Api\GeographyTransferController;
 use App\Http\Controllers\Api\GovernorateController;
 use App\Http\Controllers\Api\IncidentAttachmentController;
@@ -19,8 +20,13 @@ use App\Http\Controllers\Api\MessageTemplateController;
 use App\Http\Controllers\Api\OutboundMessageController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
+use App\Http\Controllers\Api\ResultsAnalyticsController;
+use App\Http\Controllers\Api\ResultsExportController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SegmentController;
+use App\Http\Controllers\Api\TallySheetAttachmentController;
+use App\Http\Controllers\Api\TallySheetController;
+use App\Http\Controllers\Api\TallySubmissionController;
 use App\Http\Controllers\Api\TurnoutSnapshotController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -30,6 +36,98 @@ Route::middleware([
     'auth:sanctum',
     'tenant',
 ])->group(function (): void {
+    Route::get(
+        'results/analytics',
+        ResultsAnalyticsController::class
+    )->name('results.analytics');
+
+    Route::get(
+        'results/export',
+        ResultsExportController::class
+    )->name('results.export');
+
+    Route::patch(
+        'election-contests/{electionContest}/activate',
+        [ElectionContestController::class, 'activate']
+    )->name('election-contests.activate');
+
+    Route::patch(
+        'election-contests/{electionContest}/close',
+        [ElectionContestController::class, 'close']
+    )->name('election-contests.close');
+
+    Route::apiResource(
+        'election-contests',
+        ElectionContestController::class
+    )->parameters([
+        'election-contests' => 'electionContest',
+    ]);
+
+    Route::patch(
+        'tally-sheets/{tallySheet}/review',
+        [TallySheetController::class, 'review']
+    )->name('tally-sheets.review');
+
+    Route::patch(
+        'tally-sheets/{tallySheet}/approve',
+        [TallySheetController::class, 'approve']
+    )->name('tally-sheets.approve');
+
+    Route::patch(
+        'tally-sheets/{tallySheet}/reject',
+        [TallySheetController::class, 'reject']
+    )->name('tally-sheets.reject');
+
+    Route::apiResource(
+        'tally-sheets',
+        TallySheetController::class
+    )
+        ->only(['index', 'store', 'show', 'update'])
+        ->parameters([
+            'tally-sheets' => 'tallySheet',
+        ]);
+
+    Route::post(
+        'tally-sheets/{tallySheet}/submissions',
+        [TallySubmissionController::class, 'store']
+    )->name('tally-sheets.submissions.store');
+
+    Route::patch(
+        'tally-submissions/{tallySubmission}/submit',
+        [TallySubmissionController::class, 'submit']
+    )->name('tally-submissions.submit');
+
+    Route::get(
+        'tally-submissions/{tallySubmission}',
+        [TallySubmissionController::class, 'show']
+    )->name('tally-submissions.show');
+
+    Route::match(
+        ['put', 'patch'],
+        'tally-submissions/{tallySubmission}',
+        [TallySubmissionController::class, 'update']
+    )->name('tally-submissions.update');
+
+    Route::delete(
+        'tally-submissions/{tallySubmission}',
+        [TallySubmissionController::class, 'destroy']
+    )->name('tally-submissions.destroy');
+
+    Route::post(
+        'tally-sheets/{tallySheet}/attachments',
+        [TallySheetAttachmentController::class, 'store']
+    )->name('tally-sheets.attachments.store');
+
+    Route::get(
+        'tally-sheet-attachments/{tallySheetAttachment}/download',
+        [TallySheetAttachmentController::class, 'download']
+    )->name('tally-sheet-attachments.download');
+
+    Route::delete(
+        'tally-sheet-attachments/{tallySheetAttachment}',
+        [TallySheetAttachmentController::class, 'destroy']
+    )->name('tally-sheet-attachments.destroy');
+
     Route::patch(
         'users/{user}/roles',
         [UserController::class, 'syncRoles']
