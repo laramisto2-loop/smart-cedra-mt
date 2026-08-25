@@ -37,7 +37,7 @@ export default function ElectionContestForm({
   contest,
   onCancel,
   onSaved,
-}) { 
+}) {
   const [form, setForm] = useState(() => contestFormValues(contest))
   const [errors, setErrors] = useState({})
   const [submitError, setSubmitError] = useState('')
