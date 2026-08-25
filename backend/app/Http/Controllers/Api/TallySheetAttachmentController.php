@@ -74,11 +74,14 @@ class TallySheetAttachmentController extends Controller
                 'disk' => $disk,
                 'path' => $path,
                 'original_name' => $file->getClientOriginalName(),
-                'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                'mime_type' => $file->getMimeType()
+                    ?: 'application/octet-stream',
                 'size_bytes' => $file->getSize(),
                 'checksum_sha256' => $checksum,
                 'captured_at' => $request->validated('captured_at'),
-                'client_updated_at' => $request->validated('client_updated_at'),
+                'client_updated_at' => $request->validated(
+                    'client_updated_at'
+                ),
             ]);
         } catch (Throwable $exception) {
             Storage::disk($disk)->delete($path);
@@ -86,7 +89,9 @@ class TallySheetAttachmentController extends Controller
             throw $exception;
         }
 
-        return (new TallySheetAttachmentResource($attachment->load('uploader')))
+        return (new TallySheetAttachmentResource(
+            $attachment->load('uploader')
+        ))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }

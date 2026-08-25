@@ -4,10 +4,10 @@ import ContactsPage from './ContactsPage.jsx'
 import GeographyPage from './GeographyPage.jsx'
 import IncidentsPage from './IncidentsPage.jsx'
 import MessagingPage from './MessagingPage.jsx'
-import TurnoutPage from './TurnoutPage.jsx'
 import SegmentsPage from './SegmentsPage.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
 import CallCenterPage from './CallCenterPage.jsx'
+import ResultsPage from './ResultsPage.jsx'
 import UserRoleManagementPage from './UserRoleManagementPage.jsx'
 import { countQueuedIncidents } from '../services/incidentQueue.js'
 import { countQueuedTurnoutSnapshots } from '../services/turnoutQueue.js'
@@ -58,7 +58,12 @@ const navigationItems = [
   {
     label: 'Results',
     icon: '▤',
-    permission: 'turnout.view',
+    permissions: [
+      'turnout.view',
+      'results.contests.view',
+      'results.tallies.view',
+      'results.analytics.view',
+    ],
     enabled: true,
   },
   {
@@ -101,10 +106,15 @@ function Dashboard({ user, onLogout }) {
   useState(null)
   const permissions = user.permissions ?? []
 
-  const visibleNavigationItems = navigationItems.filter(
-    (item) =>
-      !item.permission || permissions.includes(item.permission),
-  )
+  const visibleNavigationItems = navigationItems.filter((item) => {
+    if (item.permissions) {
+      return item.permissions.some((permission) =>
+        permissions.includes(permission),
+      )
+    }
+
+    return !item.permission || permissions.includes(item.permission)
+  })
 
   const capabilities = [
     {
@@ -301,8 +311,8 @@ const logoutMessage =
           <IncidentsPage user={user} />
         )}
 
-        {activePage === 'Results' && (
-          <TurnoutPage user={user} />
+       {activePage === 'Results' && (
+          <ResultsPage permissions={permissions} user={user} />
         )}
 
         {activePage === 'Users' && (

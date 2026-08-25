@@ -14,14 +14,22 @@ class StoreTallySheetAttachmentRequest extends FormRequest
 
         return $sheet instanceof TallySheet
             && ! $sheet->isFinalized()
-            && ($this->user()?->can('create', TallySheetAttachment::class) ?? false)
+            && ($this->user()?->can(
+                'create',
+                TallySheetAttachment::class
+            ) ?? false)
             && ($this->user()?->can('view', $sheet) ?? false);
     }
 
     public function rules(): array
     {
         return [
-            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:15360'],
+            'file' => [
+                'required',
+                'file',
+                'mimes:pdf,jpg,jpeg,png,webp',
+                'max:10240',
+            ],
             'client_uuid' => ['sometimes', 'nullable', 'uuid'],
             'captured_at' => ['nullable', 'date'],
             'client_updated_at' => ['nullable', 'date'],

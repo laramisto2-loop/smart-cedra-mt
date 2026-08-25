@@ -82,6 +82,9 @@ class ResultsExportController extends Controller
                     return;
                 }
 
+                fwrite($stream, "\xEF\xBB\xBF");
+                fwrite($stream, "sep=,\r\n");
+
                 fputcsv($stream, [
                     'Tally reference',
                     'Contest code',
