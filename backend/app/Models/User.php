@@ -50,7 +50,14 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_platform_admin' => 'boolean',
         ];
+    }
+
+    public function isPlatformAdministrator(): bool
+    {
+        return $this->is_platform_admin
+            && $this->tenant_id === null;
     }
 
     public function tenant(): BelongsTo

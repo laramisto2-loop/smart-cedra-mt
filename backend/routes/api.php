@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\IncidentAttachmentController;
 use App\Http\Controllers\Api\IncidentController;
 use App\Http\Controllers\Api\MessageTemplateController;
 use App\Http\Controllers\Api\OutboundMessageController;
+use App\Http\Controllers\Api\PlatformTenantController;
 use App\Http\Controllers\Api\PollingCenterController;
 use App\Http\Controllers\Api\PollingStationController;
 use App\Http\Controllers\Api\ResultsAnalyticsController;
@@ -31,6 +32,31 @@ use App\Http\Controllers\Api\TurnoutSnapshotController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware([
+    'auth:sanctum',
+    'platform',
+])
+    ->prefix('platform')
+    ->name('platform.')
+    ->group(function (): void {
+        Route::get(
+            'user',
+            [AuthenticatedSessionController::class, 'show']
+        )->name('user.show');
+
+        Route::patch(
+            'tenants/{tenant}/status',
+            [PlatformTenantController::class, 'updateStatus']
+        )->name('tenants.status.update');
+
+        Route::apiResource(
+            'tenants',
+            PlatformTenantController::class
+        )->except([
+            'destroy',
+        ]);
+    });
 
 Route::middleware([
     'auth:sanctum',
