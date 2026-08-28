@@ -1,9 +1,19 @@
 import api from '../lib/api.js'
 
 export async function getAuthenticatedUser() {
-  const response = await api.get('/api/user')
+  try {
+    const response = await api.get('/api/user')
 
-  return response.data.data
+    return response.data.data
+  } catch (requestError) {
+    if (requestError.response?.status !== 403) {
+      throw requestError
+    }
+
+    const response = await api.get('/api/platform/user')
+
+    return response.data.data
+  }
 }
 
 export async function login(credentials) {

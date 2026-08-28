@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import Dashboard from './components/Dashboard.jsx'
 import LoginPage from './components/LoginPage.jsx'
+import PlatformDashboard from './components/PlatformDashboard.jsx'
 import {
   getAuthenticatedUser,
   login,
@@ -103,6 +104,15 @@ function App() {
 
   if (!user) {
     return <LoginPage onLogin={handleLogin} />
+  }
+
+  if (user.is_platform_admin) {
+    return (
+      <PlatformDashboard
+        user={user}
+        onLogout={handleLogout}
+      />
+    )
   }
 
   return (
