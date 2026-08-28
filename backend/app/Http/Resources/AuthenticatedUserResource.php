@@ -16,6 +16,7 @@ class AuthenticatedUserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'is_platform_admin' => $this->isPlatformAdministrator(),
             'tenant' => $this->whenLoaded(
                 'tenant',
                 function (): ?array {

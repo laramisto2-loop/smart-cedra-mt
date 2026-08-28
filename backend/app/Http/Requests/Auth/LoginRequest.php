@@ -55,10 +55,18 @@ class LoginRequest extends FormRequest
 
         $user = Auth::user();
 
+        $isPlatformAdministrator =
+            $user?->isPlatformAdministrator() ?? false;
+
+        $isActiveTenantUser =
+            $user !== null
+            && ! $user->is_platform_admin
+            && $user->tenant !== null
+            && $user->tenant->status === 'active';
+
         if (
-            $user === null ||
-            $user->tenant === null ||
-            $user->tenant->status !== 'active'
+            ! $isPlatformAdministrator
+            && ! $isActiveTenantUser
         ) {
             Auth::logout();
             RateLimiter::hit($this->throttleKey());
