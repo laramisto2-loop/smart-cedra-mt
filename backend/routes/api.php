@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CampaignTaskController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactInteractionController;
 use App\Http\Controllers\Api\ContactTransferController;
+use App\Http\Controllers\Api\DashboardSummaryController;
 use App\Http\Controllers\Api\DistrictController;
 use App\Http\Controllers\Api\ElectionContestController;
 use App\Http\Controllers\Api\GeographyTransferController;
@@ -63,6 +64,11 @@ Route::middleware([
     'auth:sanctum',
     'tenant',
 ])->group(function (): void {
+    Route::get(
+        'dashboard-summary',
+        DashboardSummaryController::class
+    )->name('dashboard-summary.show');
+
     Route::get(
         'tenant-settings',
         [TenantSettingController::class, 'show']

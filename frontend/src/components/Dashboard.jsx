@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CampaignTasksPage from './CampaignTasksPage.jsx'
 import ContactsPage from './ContactsPage.jsx'
 import GeographyPage from './GeographyPage.jsx'
@@ -12,6 +12,7 @@ import UserRoleManagementPage from './UserRoleManagementPage.jsx'
 import SettingsPage from './SettingsPage.jsx'
 import { countQueuedIncidents } from '../services/incidentQueue.js'
 import { countQueuedTurnoutSnapshots } from '../services/turnoutQueue.js'
+import { getDashboardSummary } from '../services/dashboard.js'
 import '../App.css'
 
 const navigationItems = [
@@ -91,20 +92,123 @@ const navigationItems = [
   },
 ]
 
-const deliveryItems = [
-  'Consent-aware contact management',
-  'Static and dynamic contact segmentation',
-  'Consent-aware interaction timelines',
-  'Task creation and assignment workflows',
-  'Validated contact CSV import and export',
-  'Offline-safe incident reporting and evidence',
-  'Offline-safe aggregate turnout reporting',
-  'Approved WhatsApp and SMS template workflows',
-  'Consent-aware outbound message processing',
-  'Quiet-hours scheduling and delivery history',
-  'Tenant-safe call scripts and campaign queues',
-  'Agent assignment and immutable call history',
+const capabilityAccessItems = [
+  {
+    label: 'CRM contacts',
+    permission: 'contacts.view',
+    description: 'Profiles, consent, and data transfer',
+  },
+  {
+    label: 'Contact segments',
+    permission: 'segments.view',
+    description: 'Manual and rule-based audiences',
+  },
+  {
+    label: 'Interaction timeline',
+    permission: 'interactions.view',
+    description: 'Consent-aware communication history',
+  },
+  {
+    label: 'Campaign tasks',
+    permission: 'tasks.view',
+    description: 'Assignments and completion workflows',
+  },
+  {
+    label: 'Field incidents',
+    permission: 'incidents.view',
+    description: 'Reports, triage, and private evidence',
+  },
+  {
+    label: 'Aggregate turnout',
+    permission: 'turnout.view',
+    description: 'Offline totals and time-series summaries',
+  },
+  {
+    label: 'Campaign messaging',
+    permission: 'messages.view',
+    description: 'Consent checks and delivery tracking',
+  },
+  {
+    label: 'Call center',
+    permission: 'calls.assignments.view',
+    description: 'Assignments and immutable call outcomes',
+  },
 ]
+
+function readableStatus(status) {
+  return status
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+function StatusBreakdown({ eyebrow, title, counts }) {
+  const entries = Object.entries(counts ?? {})
+  const total = entries.reduce(
+    (sum, [, count]) => sum + count,
+    0,
+  )
+  const largest = Math.max(...entries.map(([, count]) => count), 0)
+
+  return (
+    <article className="dashboard-analysis-card">
+      <div className="dashboard-card-heading">
+        <div>
+          <p className="eyebrow">{eyebrow}</p>
+          <h3>{title}</h3>
+        </div>
+        <strong className="dashboard-chart-total">{total}</strong>
+      </div>
+
+      {total === 0 ? (
+        <p className="dashboard-empty-chart">
+          No records have been added yet.
+        </p>
+      ) : (
+        <div className="dashboard-status-list">
+          {entries.map(([status, count]) => (
+            <div className="dashboard-status-row" key={status}>
+              <div className="dashboard-status-label">
+                <span>{readableStatus(status)}</span>
+                <strong>{count}</strong>
+              </div>
+              <div className="dashboard-status-track">
+                <span
+                  className={`dashboard-status-fill status-${status}`}
+                  style={{
+                    width: `${largest === 0
+                      ? 0
+                      : (count / largest) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </article>
+  )
+}
+
+function PerformanceMetric({ label, rate, detail, color }) {
+  return (
+    <div className="dashboard-performance-metric">
+      <div
+        className="dashboard-rate-ring"
+        style={{
+          '--dashboard-rate': rate,
+          '--dashboard-rate-color': color,
+        }}
+        aria-label={`${label}: ${rate}%`}
+      >
+        <span>{rate}%</span>
+      </div>
+      <div>
+        <strong>{label}</strong>
+        <span>{detail}</span>
+      </div>
+    </div>
+  )
+}
 
 function Dashboard({ user, onLogout }) {
   const [activePage, setActivePage] = useState('Dashboard')
@@ -113,6 +217,10 @@ function Dashboard({ user, onLogout }) {
   const [tenantSettings, setTenantSettings] = useState(
     user.tenant.settings ?? {},
   )
+  const [dashboardSummary, setDashboardSummary] = useState(null)
+  const [dashboardLoading, setDashboardLoading] = useState(true)
+  const [dashboardError, setDashboardError] = useState('')
+  const [dashboardRefreshKey, setDashboardRefreshKey] = useState(0)
   const permissions = user.permissions ?? []
 
   const visibleNavigationItems = navigationItems.filter((item) => {
@@ -124,51 +232,6 @@ function Dashboard({ user, onLogout }) {
 
     return !item.permission || permissions.includes(item.permission)
   })
-
-  const capabilities = [
-    {
-      label: 'CRM contacts',
-      permission: 'contacts.view',
-      description: 'Profiles, consent, and data transfer',
-    },
-    {
-      label: 'Contact segments',
-      permission: 'segments.view',
-      description: 'Manual and rule-based audiences',
-    },
-    {
-      label: 'Interaction timeline',
-      permission: 'interactions.view',
-      description: 'Consent-aware communication history',
-    },
-    {
-      label: 'Campaign tasks',
-      permission: 'tasks.view',
-      description: 'Assignments and completion workflows',
-    },
-    {
-      label: 'Field incidents',
-      permission: 'incidents.view',
-      description: 'Reports, triage, and private evidence',
-    },
-    {
-      label: 'Aggregate turnout',
-      permission: 'turnout.view',
-      description: 'Offline totals and time-series summaries',
-    },
-    {
-      label: 'Campaign messaging',
-      permission: 'messages.view',
-      description:
-        'Consent checks, templates, and delivery tracking',
-    },
-    {
-      label: 'Call center',
-      permission: 'calls.assignments.view',
-      description:
-        'Scripts, queues, assignments, and call outcomes',
-    },
-  ]
 
   const initials = user.name
     .split(' ')
@@ -184,6 +247,92 @@ function Dashboard({ user, onLogout }) {
     || 'ElectoFlow'
   const primaryColor = tenantSettings.primary_color
     || '#28a9e2'
+
+  useEffect(() => {
+    if (activePage !== 'Dashboard') {
+      return undefined
+    }
+
+    let cancelled = false
+
+    async function loadSummary() {
+      setDashboardLoading(true)
+      setDashboardError('')
+
+      try {
+        const summary = await getDashboardSummary()
+
+        if (!cancelled) {
+          setDashboardSummary(summary)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setDashboardError(
+            error.response?.data?.message
+              ?? 'The dashboard statistics could not be loaded.',
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setDashboardLoading(false)
+        }
+      }
+    }
+
+    loadSummary()
+
+    return () => {
+      cancelled = true
+    }
+  }, [activePage, dashboardRefreshKey])
+
+  const dashboardKpis = dashboardSummary
+    ? [
+        dashboardSummary.contacts && {
+          label: 'Active contacts',
+          value: dashboardSummary.contacts.active,
+          context: `${dashboardSummary.contacts.total} total contacts`,
+          accent: 'blue',
+        },
+        dashboardSummary.contacts && {
+          label: 'Consent coverage',
+          value: `${dashboardSummary.contacts.consent_coverage_rate}%`,
+          context: `${dashboardSummary.contacts.with_granted_consent} active ${
+            dashboardSummary.contacts.with_granted_consent === 1
+              ? 'contact'
+              : 'contacts'
+          } opted in`,
+          accent: 'teal',
+          progress: dashboardSummary.contacts.consent_coverage_rate,
+        },
+        dashboardSummary.tasks && {
+          label: 'Open tasks',
+          value: dashboardSummary.tasks.open,
+          context: `${dashboardSummary.tasks.completion_rate}% completion rate`,
+          accent: 'amber',
+        },
+        dashboardSummary.incidents && {
+          label: 'Open incidents',
+          value: dashboardSummary.incidents.open,
+          context: `${dashboardSummary.incidents.critical_open} critical`,
+          accent: 'red',
+        },
+        dashboardSummary.messages && {
+          label: 'Message delivery',
+          value: `${dashboardSummary.messages.delivery_rate}%`,
+          context: `${dashboardSummary.messages.delivered} delivered or read`,
+          accent: 'purple',
+          progress: dashboardSummary.messages.delivery_rate,
+        },
+        dashboardSummary.calls && {
+          label: 'Call completion',
+          value: `${dashboardSummary.calls.completion_rate}%`,
+          context: `${dashboardSummary.calls.open} assignments still open`,
+          accent: 'navy',
+          progress: dashboardSummary.calls.completion_rate,
+        },
+      ].filter(Boolean)
+    : []
 
   function selectPage(item) {
     if (item.enabled) {
@@ -371,13 +520,12 @@ const logoutMessage =
             <section className="welcome-panel">
               <div>
                 <span className="panel-badge">
-                  MT-6 Messaging + Call Center
+                  Live campaign overview
                 </span>
                 <h3>Welcome to {user.tenant.name}</h3>
                 <p>
-                  Manage tenant-isolated contacts, audiences,
-                  field operations, turnout reporting, and
-                  consent-aware campaign communications from
+                  Track campaign activity, operational workload,
+                  incidents, and communication performance from
                   one protected workspace.
                 </p>
               </div>
@@ -393,92 +541,204 @@ const logoutMessage =
               </div>
             </section>
 
-            <section
-              className="statistics-grid"
-              aria-label="Available campaign capabilities"
-            >
-              {capabilities.map((capability) => {
-                const available = permissions.includes(
-                  capability.permission,
-                )
+            {dashboardError && (
+              <div className="dashboard-error" role="alert">
+                <span>{dashboardError}</span>
+                <button
+                  type="button"
+                  onClick={() => setDashboardRefreshKey(
+                    (value) => value + 1,
+                  )}
+                >
+                  Try again
+                </button>
+              </div>
+            )}
 
-                return (
+            {dashboardLoading ? (
+              <section
+                className="dashboard-kpi-grid"
+                aria-label="Loading campaign statistics"
+              >
+                {[1, 2, 3, 4].map((item) => (
                   <article
-                    className="statistic-card"
-                    key={capability.label}
+                    className="dashboard-kpi-card dashboard-kpi-skeleton"
+                    key={item}
                   >
-                    <span>{capability.label}</span>
-                    <strong>
-                      {available ? 'Ready' : 'Restricted'}
-                    </strong>
-                    <p>{capability.description}</p>
+                    <span />
+                    <strong />
+                    <p />
                   </article>
-                )
-              })}
+                ))}
+              </section>
+            ) : (
+              <section
+                className="dashboard-kpi-grid"
+                aria-label="Campaign statistics"
+              >
+                {dashboardKpis.map((kpi) => (
+                  <article
+                    className={`dashboard-kpi-card dashboard-kpi-${kpi.accent}`}
+                    key={kpi.label}
+                  >
+                    <span>{kpi.label}</span>
+                    <strong>{kpi.value}</strong>
+                    <p>{kpi.context}</p>
+                    {kpi.progress !== undefined && (
+                      <div
+                        className="dashboard-kpi-progress"
+                        aria-hidden="true"
+                      >
+                        <span
+                          style={{ width: `${kpi.progress}%` }}
+                        />
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </section>
+            )}
+
+            <section
+              className="dashboard-access-panel"
+              aria-labelledby="workspace-access-heading"
+            >
+              <div className="dashboard-access-heading">
+                <div>
+                  <p className="eyebrow">Permissions</p>
+                  <h3 id="workspace-access-heading">
+                    Workspace access
+                  </h3>
+                </div>
+                <p>
+                  Availability for your current role
+                </p>
+              </div>
+
+              <div className="dashboard-access-grid">
+                {capabilityAccessItems.map((capability) => {
+                  const available = permissions.includes(
+                    capability.permission,
+                  )
+
+                  return (
+                    <article
+                      className={`dashboard-access-item ${
+                        available
+                          ? 'dashboard-access-ready'
+                          : 'dashboard-access-restricted'
+                      }`}
+                      key={capability.label}
+                    >
+                      <div>
+                        <strong>{capability.label}</strong>
+                        <span>{capability.description}</span>
+                      </div>
+                      <span className="dashboard-access-status">
+                        <span aria-hidden="true">
+                          {available ? '✓' : '—'}
+                        </span>
+                        {available ? 'Ready' : 'Restricted'}
+                      </span>
+                    </article>
+                  )
+                })}
+              </div>
             </section>
 
-            <section className="content-grid">
-              <article className="content-card">
-                <div className="card-heading">
-                  <div>
-                    <p className="eyebrow">
-                      Tenant information
-                    </p>
-                    <h3>Campaign configuration</h3>
-                  </div>
-                </div>
+            {!dashboardLoading && dashboardSummary && (
+              <section
+                className="dashboard-insights-grid"
+                aria-label="Operational charts"
+              >
+                {dashboardSummary.tasks && (
+                  <StatusBreakdown
+                    eyebrow="Workload"
+                    title="Tasks by status"
+                    counts={dashboardSummary.tasks.by_status}
+                  />
+                )}
 
-                <dl className="details-list">
-                  <div>
-                    <dt>Tenant name</dt>
-                    <dd>{user.tenant.name}</dd>
+                {dashboardSummary.incidents && (
+                  <StatusBreakdown
+                    eyebrow="Field operations"
+                    title="Incidents by status"
+                    counts={dashboardSummary.incidents.by_status}
+                  />
+                )}
+
+                {(dashboardSummary.messages
+                  || dashboardSummary.calls) && (
+                  <article className="dashboard-analysis-card">
+                    <div className="dashboard-card-heading">
+                      <div>
+                        <p className="eyebrow">Communications</p>
+                        <h3>Performance</h3>
+                      </div>
+                    </div>
+
+                    <div className="dashboard-performance-list">
+                      {dashboardSummary.messages && (
+                        <PerformanceMetric
+                          label="Message delivery"
+                          rate={dashboardSummary.messages.delivery_rate}
+                          detail={`${dashboardSummary.messages.total} messages tracked`}
+                          color="#7c5ce5"
+                        />
+                      )}
+                      {dashboardSummary.calls && (
+                        <PerformanceMetric
+                          label="Call completion"
+                          rate={dashboardSummary.calls.completion_rate}
+                          detail={`${dashboardSummary.calls.attempts ?? 0} attempts recorded`}
+                          color="#1587b7"
+                        />
+                      )}
+                    </div>
+                  </article>
+                )}
+
+                <article className="dashboard-analysis-card">
+                  <div className="dashboard-card-heading">
+                    <div>
+                      <p className="eyebrow">
+                        Tenant information
+                      </p>
+                      <h3>Campaign configuration</h3>
+                    </div>
                   </div>
 
-                  <div>
-                    <dt>Tenant slug</dt>
-                    <dd>{user.tenant.slug}</dd>
-                  </div>
+                  <dl className="details-list">
+                    <div>
+                      <dt>Tenant name</dt>
+                      <dd>{user.tenant.name}</dd>
+                    </div>
 
-                  <div>
-                    <dt>Timezone</dt>
-                    <dd>
-                      {tenantSettings.timezone ?? 'Asia/Beirut'}
-                    </dd>
-                  </div>
+                    <div>
+                      <dt>Tenant slug</dt>
+                      <dd>{user.tenant.slug}</dd>
+                    </div>
 
-                  <div>
-                    <dt>Status</dt>
-                    <dd>
-                      <span className="active-pill">
-                        {tenantStatus}
-                      </span>
-                    </dd>
-                  </div>
-                </dl>
-              </article>
+                    <div>
+                      <dt>Timezone</dt>
+                      <dd>
+                        {tenantSettings.timezone ?? 'Asia/Beirut'}
+                      </dd>
+                    </div>
 
-              <article className="content-card">
-                <div className="card-heading">
-                  <div>
-                    <p className="eyebrow">
-                      Implementation progress
-                    </p>
-                    <h3>MT-6 delivery</h3>
-                  </div>
-                </div>
+                    <div>
+                      <dt>Status</dt>
+                      <dd>
+                        <span className="active-pill">
+                          {tenantStatus}
+                        </span>
+                      </dd>
+                    </div>
+                  </dl>
+                </article>
+              </section>
+            )}
 
-                <ul className="progress-list">
-                  {deliveryItems.map((item) => (
-                    <li key={item}>
-                      <span className="progress-check">
-                        ✓
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            </section>
           </>
         )}
       </main>
