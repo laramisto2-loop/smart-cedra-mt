@@ -6,13 +6,51 @@ This runbook explains how to install, start, verify, back up, and troubleshoot t
 
 ## Requirements
 
+### Recommended reproducible setup
+
+- Docker Desktop with Docker Compose
+
+### Original local setup
+
 - XAMPP with Apache and MySQL
 - PHP 8.2 or later
 - Composer
 - Node.js and npm
 - Git
 
-## First-Time Setup
+## Docker Setup
+
+Docker is the recommended setup for demonstrations, handover, and reproducible development. It runs the React frontend, Laravel backend, queue worker, and MySQL database as one managed environment.
+
+Start Docker Desktop. From the project folder, run:
+
+    docker compose up --build
+
+Open `http://localhost:5173` after all services report that they are running.
+
+Development accounts:
+
+- Tenant administrator: `admin@cedra.test` / `password`
+- Platform administrator: `platform@electoflow.test` / `password`
+
+Stop the environment with:
+
+    docker compose down
+
+The Docker database is stored in a named volume and exposed to Windows on port `3307`. It is separate from the XAMPP database on port `3306`.
+
+Check service status and recent logs with:
+
+    docker compose ps
+    docker compose logs --tail 100
+
+Run verification inside the containers with:
+
+    docker compose exec backend php artisan test
+    docker compose exec frontend npm run lint
+    docker compose exec frontend npm run build
+
+## First-Time Setup Without Docker
 
 ### 1. Start the database
 
