@@ -9,6 +9,7 @@ import ConfirmDialog from './ConfirmDialog.jsx'
 import CallCenterPage from './CallCenterPage.jsx'
 import ResultsPage from './ResultsPage.jsx'
 import UserRoleManagementPage from './UserRoleManagementPage.jsx'
+import SettingsPage from './SettingsPage.jsx'
 import { countQueuedIncidents } from '../services/incidentQueue.js'
 import { countQueuedTurnoutSnapshots } from '../services/turnoutQueue.js'
 import '../App.css'
@@ -75,13 +76,18 @@ const navigationItems = [
   {
     label: 'Call Center',
     icon: '☎',
-    permission: 'calls.assignments.view',
+    permissions: [
+      'calls.scripts.view',
+      'calls.queues.view',
+      'calls.assignments.view',
+    ],
     enabled: true,
   },
   {
     label: 'Settings',
     icon: '⚙',
-    enabled: false,
+    permission: 'settings.manage',
+    enabled: true,
   },
 ]
 
@@ -104,6 +110,9 @@ function Dashboard({ user, onLogout }) {
   const [activePage, setActivePage] = useState('Dashboard')
   const [logoutConfirmation, setLogoutConfirmation] =
   useState(null)
+  const [tenantSettings, setTenantSettings] = useState(
+    user.tenant.settings ?? {},
+  )
   const permissions = user.permissions ?? []
 
   const visibleNavigationItems = navigationItems.filter((item) => {
@@ -171,6 +180,10 @@ function Dashboard({ user, onLogout }) {
   const tenantStatus =
     user.tenant.status.charAt(0).toUpperCase() +
     user.tenant.status.slice(1)
+  const brandName = tenantSettings.brand_name?.trim()
+    || 'ElectoFlow'
+  const primaryColor = tenantSettings.primary_color
+    || '#28a9e2'
 
   function selectPage(item) {
     if (item.enabled) {
@@ -216,10 +229,15 @@ const logoutMessage =
     <div className="admin-layout">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-logo">EF</div>
+          <div
+            className="brand-logo"
+            style={{ backgroundColor: primaryColor }}
+          >
+            EF
+          </div>
 
           <div>
-            <h1>ElectoFlow</h1>
+            <h1>{brandName}</h1>
             <p>Campaign Operations</p>
           </div>
         </div>
@@ -264,14 +282,28 @@ const logoutMessage =
         </div>
       </aside>
 
-      <main className="main-content">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">
-              Tenant administration
-            </p>
-            <h2>{activePage}</h2>
-          </div>
+      <main
+        className={`main-content ${
+          activePage === 'Dashboard'
+            ? ''
+            : 'section-content'
+        }`}
+      >
+        <header
+          className={`topbar ${
+            activePage === 'Dashboard'
+              ? ''
+              : 'topbar-profile-only'
+          }`}
+        >
+          {activePage === 'Dashboard' && (
+            <div>
+              <p className="eyebrow">
+                Tenant administration
+              </p>
+              <h2>Dashboard</h2>
+            </div>
+          )}
 
           <div className="user-profile">
             <div className="user-avatar">{initials}</div>
@@ -325,6 +357,13 @@ const logoutMessage =
 
         {activePage === 'Call Center' && (
           <CallCenterPage user={user} />
+        )}
+
+        {activePage === 'Settings' && (
+          <SettingsPage
+            user={user}
+            onSaved={setTenantSettings}
+          />
         )}
 
         {activePage === 'Dashboard' && (
@@ -402,7 +441,9 @@ const logoutMessage =
 
                   <div>
                     <dt>Timezone</dt>
-                    <dd>Asia/Beirut</dd>
+                    <dd>
+                      {tenantSettings.timezone ?? 'Asia/Beirut'}
+                    </dd>
                   </div>
 
                   <div>

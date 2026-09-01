@@ -76,6 +76,8 @@ export default function TallySheetDetails({
   }, [loadDetails])
 
   const submissions = sheet?.submissions ?? []
+  const recordedSubmissionsCount =
+    sheet?.submissions_count ?? submissions.length
 
   const ownDraft = submissions.find(
     (submission) =>
@@ -97,6 +99,7 @@ export default function TallySheetDetails({
 
   const nextEntryNumber =
     ownDraft?.entry_number
+    ?? sheet?.next_entry_number
     ?? (firstEntry ? 2 : 1)
 
   const acceptsEntries = [
@@ -113,6 +116,7 @@ export default function TallySheetDetails({
   const canSubmit =
     permissions.includes('results.tallies.submit')
     && acceptsEntries
+    && nextEntryNumber !== null
     && !ownSubmittedEntry
     && !sameUserWouldEnterTwice
 
@@ -121,16 +125,12 @@ export default function TallySheetDetails({
     'discrepancy',
   ].includes(sheet?.status)
 
-  const canReview =
-    permissions.includes('results.tallies.review')
+  const canReview = Boolean(sheet?.actions?.review)
     && isReviewable
 
-  const canApprove =
-    permissions.includes('results.tallies.approve')
-    && sheet?.status === 'ready_for_review'
+  const canApprove = Boolean(sheet?.actions?.approve)
 
-  const canReject =
-    permissions.includes('results.tallies.approve')
+  const canReject = Boolean(sheet?.actions?.reject)
     && isReviewable
 
   async function refreshAndNotify() {
@@ -194,7 +194,7 @@ export default function TallySheetDetails({
               </span>
 
               <span>
-                {submissions.length} of 2 entries recorded
+                {recordedSubmissionsCount} of 2 entries recorded
               </span>
             </div>
 
@@ -250,6 +250,13 @@ export default function TallySheetDetails({
               <div className="info-banner">
                 The second entry must be recorded by a different
                 user. Sign in using another authorized account.
+              </div>
+            )}
+
+            {sheet.has_hidden_submissions && (
+              <div className="info-banner">
+                An independent entry has been sealed. Its counts
+                remain hidden until the second entry is submitted.
               </div>
             )}
 

@@ -29,6 +29,14 @@ class AuthenticatedUserResource extends JsonResource
                         'name' => $this->tenant->name,
                         'slug' => $this->tenant->slug,
                         'status' => $this->tenant->status,
+                        'settings' => $this->tenant->relationLoaded('settings')
+                            && $this->tenant->settings !== null
+                            ? [
+                                'brand_name' => $this->tenant->settings->brand_name,
+                                'primary_color' => $this->tenant->settings->primary_color,
+                                'timezone' => $this->tenant->settings->timezone,
+                            ]
+                            : null,
                     ];
                 }
             ),

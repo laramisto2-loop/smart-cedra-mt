@@ -50,6 +50,7 @@ class TallySheetPolicy
     ): bool {
         return $user->hasPermission('results.tallies.review')
             && $this->belongsToUsersTenant($user, $tallySheet)
+            && ! $this->userEnteredSubmission($user, $tallySheet)
             && in_array(
                 $tallySheet->status,
                 [
@@ -66,6 +67,11 @@ class TallySheetPolicy
     ): bool {
         return $user->hasPermission('results.tallies.approve')
             && $this->belongsToUsersTenant($user, $tallySheet)
+            && ! $this->userEnteredSubmission($user, $tallySheet)
+            && $tallySheet->reviewed_by_user_id !== null
+            && $tallySheet->reviewed_at !== null
+            && (int) $tallySheet->reviewed_by_user_id
+                !== (int) $user->id
             && $tallySheet->status
                 === TallySheet::STATUS_READY_FOR_REVIEW;
     }
@@ -76,6 +82,12 @@ class TallySheetPolicy
     ): bool {
         return $user->hasPermission('results.tallies.approve')
             && $this->belongsToUsersTenant($user, $tallySheet)
+            && ! $this->userEnteredSubmission($user, $tallySheet)
+            && (
+                $tallySheet->reviewed_by_user_id === null
+                || (int) $tallySheet->reviewed_by_user_id
+                    !== (int) $user->id
+            )
             && in_array(
                 $tallySheet->status,
                 [
@@ -129,5 +141,14 @@ class TallySheetPolicy
 
         return (int) $tallySheet->created_by_user_id
             === (int) $user->id;
+    }
+
+    private function userEnteredSubmission(
+        User $user,
+        TallySheet $tallySheet
+    ): bool {
+        return $tallySheet->submissions()
+            ->where('entered_by_user_id', $user->id)
+            ->exists();
     }
 }

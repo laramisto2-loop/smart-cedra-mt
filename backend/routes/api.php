@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\SegmentController;
 use App\Http\Controllers\Api\TallySheetAttachmentController;
 use App\Http\Controllers\Api\TallySheetController;
 use App\Http\Controllers\Api\TallySubmissionController;
+use App\Http\Controllers\Api\TenantSettingController;
 use App\Http\Controllers\Api\TurnoutSnapshotController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -62,6 +63,16 @@ Route::middleware([
     'auth:sanctum',
     'tenant',
 ])->group(function (): void {
+    Route::get(
+        'tenant-settings',
+        [TenantSettingController::class, 'show']
+    )->name('tenant-settings.show');
+
+    Route::patch(
+        'tenant-settings',
+        [TenantSettingController::class, 'update']
+    )->name('tenant-settings.update');
+
     Route::get(
         'results/analytics',
         ResultsAnalyticsController::class

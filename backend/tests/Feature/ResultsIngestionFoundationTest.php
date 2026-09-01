@@ -42,6 +42,10 @@ class ResultsIngestionFoundationTest extends TestCase
     public function test_results_relationships_and_double_entry_identity_work(): void
     {
         $admin = $this->findUser('admin@cedra.test');
+        $approver = $this->createUserWithRole(
+            $admin->tenant,
+            'tenant_admin'
+        );
         $firstAgent = $this->createUserWithRole($admin->tenant, 'field_agent');
         $secondAgent = $this->createUserWithRole($admin->tenant, 'field_agent');
         $contest = $this->createContest($admin);
@@ -80,7 +84,7 @@ class ResultsIngestionFoundationTest extends TestCase
         ]);
         $sheet->update([
             'status' => TallySheet::STATUS_APPROVED,
-            'approved_by_user_id' => $admin->id,
+            'approved_by_user_id' => $approver->id,
             'approved_submission_id' => $firstEntry->id,
         ]);
 
@@ -224,6 +228,14 @@ class ResultsIngestionFoundationTest extends TestCase
     public function test_submitted_entries_and_finalized_sheets_are_immutable(): void
     {
         $admin = $this->findUser('admin@cedra.test');
+        $reviewer = $this->createUserWithRole(
+            $admin->tenant,
+            'tenant_admin'
+        );
+        $approver = $this->createUserWithRole(
+            $admin->tenant,
+            'tenant_admin'
+        );
         $contest = $this->createContest($admin);
         $option = $this->createOption($admin, $contest);
         $sheet = $this->createSheet($admin, $contest);
@@ -245,9 +257,17 @@ class ResultsIngestionFoundationTest extends TestCase
             fn () => $result->delete()
         );
 
+        $this->actingAs($reviewer);
+        $sheet->update([
+            'status' => TallySheet::STATUS_READY_FOR_REVIEW,
+            'reviewed_by_user_id' => $reviewer->id,
+            'reviewed_at' => now(),
+        ]);
+
+        $this->actingAs($approver);
         $sheet->update([
             'status' => TallySheet::STATUS_APPROVED,
-            'approved_by_user_id' => $admin->id,
+            'approved_by_user_id' => $approver->id,
             'approved_submission_id' => $submission->id,
         ]);
 
@@ -288,6 +308,13 @@ class ResultsIngestionFoundationTest extends TestCase
 
         $this->assertTrue(Gate::forUser($coordinator)->allows('review', $sheet));
         $this->assertFalse(Gate::forUser($fieldAgent)->allows('review', $sheet));
+        $this->assertFalse(Gate::forUser($admin)->allows('approve', $sheet));
+
+        $sheet->update([
+            'reviewed_by_user_id' => $coordinator->id,
+            'reviewed_at' => now(),
+        ]);
+
         $this->assertTrue(Gate::forUser($admin)->allows('approve', $sheet));
     }
 

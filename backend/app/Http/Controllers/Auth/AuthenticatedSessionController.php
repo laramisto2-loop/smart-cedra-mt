@@ -19,7 +19,7 @@ class AuthenticatedSessionController extends Controller
 
         return new AuthenticatedUserResource(
             $request->user()->load([
-                'tenant',
+                'tenant.settings',
                 'roles.permissions',
             ])
         );
@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
     ): AuthenticatedUserResource {
         return new AuthenticatedUserResource(
             $request->user()->load([
-                'tenant',
+                'tenant.settings',
                 'roles.permissions',
             ])
         );

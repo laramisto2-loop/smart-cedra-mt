@@ -6,6 +6,7 @@ import {
   listElectionContests,
 } from '../services/resultsIngestion.js'
 import ElectionContestForm from './ElectionContestForm.jsx'
+import ConfirmDialog from './ConfirmDialog.jsx'
 
 const statusOptions = ['draft', 'active', 'closed']
 
@@ -48,6 +49,7 @@ export default function ElectionContestsPanel({ permissions = [] }) {
   const [formContest, setFormContest] = useState(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [workingId, setWorkingId] = useState(null)
+  const [contestToClose, setContestToClose] = useState(null)
 
   const canCreate = permissions.includes('results.contests.create')
   const canUpdate = permissions.includes('results.contests.update')
@@ -117,14 +119,39 @@ export default function ElectionContestsPanel({ permissions = [] }) {
         setNotice(`The ${contest.name} contest is now active.`)
       }
 
-      if (action === 'close') {
-        await closeElectionContest(contest.id)
-        setNotice(`The ${contest.name} contest is now closed.`)
-      }
-
       await loadContests()
     } catch (requestError) {
       setError(errorMessage(requestError, 'The contest status could not be updated.'))
+    } finally {
+      setWorkingId(null)
+    }
+  }
+
+  async function handleCloseContest() {
+    const contest = contestToClose
+
+    if (!contest) {
+      return
+    }
+
+    setWorkingId(contest.id)
+    setError('')
+    setNotice('')
+
+    try {
+      await closeElectionContest(contest.id)
+      setContestToClose(null)
+      setNotice(`The ${contest.name} contest is now closed.`)
+      await loadContests()
+    } catch (requestError) {
+      setError(
+        errorMessage(
+          requestError,
+          'The contest could not be closed.',
+        ),
+      )
+
+      throw requestError
     } finally {
       setWorkingId(null)
     }
@@ -298,7 +325,7 @@ export default function ElectionContestsPanel({ permissions = [] }) {
                     </td>
                     <td>
                       <div className="table-actions">
-                        {canUpdate && (
+                        {canUpdate && contest.status === 'draft' && (
                           <button
                             className="table-link"
                             onClick={() => openEditForm(contest)}
@@ -323,7 +350,7 @@ export default function ElectionContestsPanel({ permissions = [] }) {
                           <button
                             className="table-link warning-link"
                             disabled={workingId === contest.id}
-                            onClick={() => handleStatusChange(contest, 'close')}
+                            onClick={() => setContestToClose(contest)}
                             type="button"
                           >
                             Close
@@ -395,6 +422,18 @@ export default function ElectionContestsPanel({ permissions = [] }) {
             setFormContest(null)
             }}
             onSaved={handleSaved}
+        />
+      )}
+
+      {contestToClose && (
+        <ConfirmDialog
+          confirmLabel="Close contest"
+          confirmingLabel="Closing..."
+          errorMessage="The election contest could not be closed."
+          message={`Close "${contestToClose.name}"? New tally sheets and result changes will no longer be accepted. This action cannot be undone.`}
+          onCancel={() => setContestToClose(null)}
+          onConfirm={handleCloseContest}
+          title="Close election contest?"
         />
       )}
     </section>

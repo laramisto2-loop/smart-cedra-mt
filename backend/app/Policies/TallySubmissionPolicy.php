@@ -97,14 +97,18 @@ class TallySubmissionPolicy
         User $user,
         TallySubmission $tallySubmission
     ): bool {
-        if (
-            $user->hasPermission('results.tallies.review')
-            || $user->hasPermission('results.tallies.approve')
-        ) {
+        if ($this->belongsToUser($user, $tallySubmission)) {
             return true;
         }
 
-        return $this->belongsToUser($user, $tallySubmission);
+        return TallySheet::withoutGlobalScopes()
+            ->whereKey($tallySubmission->tally_sheet_id)
+            ->where('tenant_id', $tallySubmission->tenant_id)
+            ->whereNotIn('status', [
+                TallySheet::STATUS_PENDING,
+                TallySheet::STATUS_AWAITING_SECOND_ENTRY,
+            ])
+            ->exists();
     }
 
     private function sheetAcceptsEntries(

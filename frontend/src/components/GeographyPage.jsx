@@ -44,6 +44,17 @@ function GeographyPage({ user }) {
 
   return (
     <div className="geography-workspace">
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">Campaign structure</p>
+          <h2>Geography</h2>
+          <p className="page-description">
+            Manage the geographic hierarchy and polling locations for this
+            campaign workspace.
+          </p>
+        </div>
+      </div>
+
       <nav
         className="geography-tabs"
         aria-label="Geography hierarchy"

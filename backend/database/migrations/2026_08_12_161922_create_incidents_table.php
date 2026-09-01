@@ -73,7 +73,9 @@ return new class extends Migration
             $table->string('status', 20)->default('submitted');
             $table->text('location_notes')->nullable();
 
-            $table->timestamp('occurred_at');
+            // DATETIME avoids MariaDB's legacy behavior of silently adding
+            // ON UPDATE CURRENT_TIMESTAMP to the table's first TIMESTAMP.
+            $table->dateTime('occurred_at');
             $table->timestamp('reported_at')->useCurrent();
             $table->timestamp('reviewed_at')->nullable();
             $table->timestamp('resolved_at')->nullable();

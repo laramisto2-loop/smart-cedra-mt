@@ -283,6 +283,7 @@ class IncidentApiTest extends TestCase
         );
 
         $incident = $this->createIncident($fieldAgent);
+        $occurredAt = $incident->fresh()->occurred_at->toISOString();
 
         $this->actingAs($coordinator)
             ->patchJson(
@@ -297,6 +298,7 @@ class IncidentApiTest extends TestCase
                 'data.assigned_to_user_id',
                 $coordinator->id
             )
+            ->assertJsonPath('data.occurred_at', $occurredAt)
             ->assertJsonPath('data.sync_version', 2);
 
         $this->actingAs($coordinator)
@@ -313,6 +315,7 @@ class IncidentApiTest extends TestCase
                 'data.reviewed_by_user_id',
                 $coordinator->id
             )
+            ->assertJsonPath('data.occurred_at', $occurredAt)
             ->assertJsonPath('data.sync_version', 3);
 
         $this->actingAs($coordinator)
@@ -330,7 +333,13 @@ class IncidentApiTest extends TestCase
                 'data.resolution_notes',
                 'Resolved during API testing.'
             )
+            ->assertJsonPath('data.occurred_at', $occurredAt)
             ->assertJsonPath('data.sync_version', 4);
+
+        $this->assertSame(
+            $occurredAt,
+            $incident->fresh()->occurred_at->toISOString()
+        );
 
         $this->assertDatabaseHas('incidents', [
             'id' => $incident->id,

@@ -338,9 +338,20 @@ class TallySheet extends Model
         if (
             $sheet->approved_submission_id === null
             || $sheet->approved_by_user_id === null
+            || $sheet->reviewed_by_user_id === null
+            || $sheet->reviewed_at === null
         ) {
             throw new LogicException(
-                'An approved tally sheet must record its approved submission and approver.'
+                'An approved tally sheet must record its review, approved submission, and approver.'
+            );
+        }
+
+        if (
+            (int) $sheet->approved_by_user_id
+            === (int) $sheet->reviewed_by_user_id
+        ) {
+            throw new LogicException(
+                'The tally reviewer and final approver must be different users.'
             );
         }
 
@@ -355,6 +366,21 @@ class TallySheet extends Model
         ) {
             throw new LogicException(
                 'The approved submission must belong to this tally sheet and tenant.'
+            );
+        }
+
+        $entryUserIds = TallySubmission::withoutGlobalScopes()
+            ->where('tally_sheet_id', $sheet->id)
+            ->pluck('entered_by_user_id')
+            ->filter()
+            ->map(fn ($userId) => (int) $userId);
+
+        if (
+            $entryUserIds->contains((int) $sheet->reviewed_by_user_id)
+            || $entryUserIds->contains((int) $sheet->approved_by_user_id)
+        ) {
+            throw new LogicException(
+                'Tally entry users cannot review or approve their own results.'
             );
         }
     }

@@ -12,6 +12,10 @@ class RbacSeeder extends Seeder
     public function run(): void
     {
         $permissionDefinitions = [
+            'settings.manage' => [
+                'name' => 'Manage tenant settings',
+                'description' => 'Manage branding and regional settings for the active tenant.',
+            ],
             'roles.manage' => [
                 'name' => 'Manage roles',
                 'description' => 'Create roles and manage role permissions.',

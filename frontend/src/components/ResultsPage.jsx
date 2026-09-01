@@ -49,7 +49,7 @@ export default function ResultsPage({
   ].filter(Boolean)
 
   return (
-    <main className="results-page">
+    <section className="results-page">
       <div className="page-heading">
         <div>
           <p className="eyebrow">ELECTION RESULTS</p>
@@ -114,6 +114,6 @@ export default function ResultsPage({
           </p>
         </section>
       )}
-    </main>
+    </section>
   )
 }

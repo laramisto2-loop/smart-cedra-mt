@@ -131,6 +131,10 @@ class ResultsIngestionApiTest extends TestCase
     public function test_double_entry_approval_drives_analytics_and_csv_export(): void
     {
         $admin = $this->findUser('admin@cedra.test');
+        $approver = $this->createUserWithRole(
+            $admin->tenant,
+            'tenant_admin'
+        );
         $firstAgent = $this->createUserWithRole($admin->tenant, 'field_agent');
         $secondAgent = $this->createUserWithRole($admin->tenant, 'field_agent');
         [$contest, $options] = $this->createActiveContest($admin);
@@ -174,6 +178,14 @@ class ResultsIngestionApiTest extends TestCase
         ]);
 
         $this->actingAs($admin)
+            ->patchJson("/api/tally-sheets/{$sheetId}/review", [
+                'submission_id' => $firstSubmissionId,
+                'notes' => 'Entries match and were reviewed.',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.reviewed_by_user_id', $admin->id);
+
+        $this->actingAs($approver)
             ->patchJson("/api/tally-sheets/{$sheetId}/approve", [
                 'submission_id' => $firstSubmissionId,
                 'notes' => 'Entries match and were approved.',
@@ -204,6 +216,171 @@ class ResultsIngestionApiTest extends TestCase
         $this->assertStringContainsString('CEDRA-RESULTS', $csv);
         $this->assertStringContainsString('LIST-A - List A', $csv);
         $this->assertStringContainsString(',70,30', str_replace("\r", '', $csv));
+    }
+
+    public function test_first_entry_is_hidden_until_independent_double_entry_finishes(): void
+    {
+        $admin = $this->findUser('admin@cedra.test');
+        $firstAgent = $this->createUserWithRole($admin->tenant, 'field_agent');
+        $secondAgent = $this->createUserWithRole($admin->tenant, 'field_agent');
+        [$contest, $options] = $this->createActiveContest($admin);
+        [$center, $station] = $this->findGeography($admin->tenant_id);
+
+        $sheetId = $this->actingAs($firstAgent)
+            ->postJson('/api/tally-sheets', [
+                'election_contest_id' => $contest->id,
+                'polling_center_id' => $center->id,
+                'polling_station_id' => $station->id,
+            ])
+            ->assertCreated()
+            ->json('data.id');
+
+        $firstSubmissionId = $this->createAndSubmitEntry(
+            $firstAgent,
+            $sheetId,
+            1,
+            $options,
+            [70, 30]
+        );
+
+        $this->actingAs($secondAgent)
+            ->getJson("/api/tally-sheets/{$sheetId}")
+            ->assertOk()
+            ->assertJsonCount(0, 'data.submissions')
+            ->assertJsonPath('data.submissions_count', 1)
+            ->assertJsonPath('data.next_entry_number', 2)
+            ->assertJsonPath('data.has_hidden_submissions', true);
+
+        $this->actingAs($admin)
+            ->getJson("/api/tally-sheets/{$sheetId}")
+            ->assertOk()
+            ->assertJsonCount(0, 'data.submissions');
+
+        $this->actingAs($secondAgent)
+            ->getJson("/api/tally-submissions/{$firstSubmissionId}")
+            ->assertForbidden();
+
+        $this->actingAs($firstAgent)
+            ->getJson("/api/tally-sheets/{$sheetId}")
+            ->assertOk()
+            ->assertJsonCount(1, 'data.submissions')
+            ->assertJsonPath(
+                'data.submissions.0.id',
+                $firstSubmissionId
+            );
+
+        $this->createAndSubmitEntry(
+            $secondAgent,
+            $sheetId,
+            2,
+            $options,
+            [70, 30]
+        );
+
+        $this->actingAs($admin)
+            ->getJson("/api/tally-sheets/{$sheetId}")
+            ->assertOk()
+            ->assertJsonCount(2, 'data.submissions')
+            ->assertJsonPath('data.has_hidden_submissions', false);
+    }
+
+    public function test_tally_review_and_approval_enforce_maker_checker_separation(): void
+    {
+        $admin = $this->findUser('admin@cedra.test');
+        $secondAgent = $this->createUserWithRole($admin->tenant, 'field_agent');
+        $reviewer = $this->createUserWithRole($admin->tenant, 'tenant_admin');
+        $approver = $this->createUserWithRole($admin->tenant, 'tenant_admin');
+        [$contest, $options] = $this->createActiveContest($admin);
+        [$center, $station] = $this->findGeography($admin->tenant_id);
+
+        $sheetId = $this->actingAs($admin)
+            ->postJson('/api/tally-sheets', [
+                'election_contest_id' => $contest->id,
+                'polling_center_id' => $center->id,
+                'polling_station_id' => $station->id,
+            ])
+            ->assertCreated()
+            ->json('data.id');
+
+        $firstSubmissionId = $this->createAndSubmitEntry(
+            $admin,
+            $sheetId,
+            1,
+            $options,
+            [70, 30]
+        );
+        $this->createAndSubmitEntry(
+            $secondAgent,
+            $sheetId,
+            2,
+            $options,
+            [70, 30]
+        );
+
+        $this->actingAs($approver)
+            ->patchJson("/api/tally-sheets/{$sheetId}/approve", [
+                'submission_id' => $firstSubmissionId,
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($admin)
+            ->patchJson("/api/tally-sheets/{$sheetId}/review", [
+                'submission_id' => $firstSubmissionId,
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($reviewer)
+            ->patchJson("/api/tally-sheets/{$sheetId}/review", [
+                'submission_id' => $firstSubmissionId,
+                'notes' => 'Independent administrative review.',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.reviewed_by_user_id', $reviewer->id);
+
+        $this->actingAs($reviewer)
+            ->patchJson("/api/tally-sheets/{$sheetId}/approve", [
+                'submission_id' => $firstSubmissionId,
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($admin)
+            ->patchJson("/api/tally-sheets/{$sheetId}/approve", [
+                'submission_id' => $firstSubmissionId,
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($approver)
+            ->patchJson("/api/tally-sheets/{$sheetId}/approve", [
+                'submission_id' => $firstSubmissionId,
+                'notes' => 'Independent final approval.',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.status', TallySheet::STATUS_APPROVED)
+            ->assertJsonPath('data.approved_by_user_id', $approver->id);
+    }
+
+    public function test_closed_contest_cannot_be_updated(): void
+    {
+        $admin = $this->findUser('admin@cedra.test');
+        [$contest] = $this->createActiveContest($admin);
+        $originalName = $contest->name;
+
+        $this->actingAs($admin)
+            ->patchJson("/api/election-contests/{$contest->id}/close")
+            ->assertOk()
+            ->assertJsonPath('data.status', ElectionContest::STATUS_CLOSED);
+
+        $this->actingAs($admin)
+            ->patchJson("/api/election-contests/{$contest->id}", [
+                'name' => 'Improper closed-contest edit',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('election_contests', [
+            'id' => $contest->id,
+            'name' => $originalName,
+            'status' => ElectionContest::STATUS_CLOSED,
+        ]);
     }
 
     public function test_discrepant_entries_require_an_explicit_review_selection(): void

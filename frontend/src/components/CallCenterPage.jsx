@@ -16,11 +16,11 @@ function CallCenterPage({ user }) {
     'calls.scripts.view',
   )
 
-  const firstAvailableSection = canViewAssignments
-    ? 'assignments'
+  const firstAvailableSection = canViewScripts
+    ? 'scripts'
     : canViewQueues
       ? 'queues'
-      : 'scripts'
+      : 'assignments'
 
   const [activeSection, setActiveSection] = useState(
     firstAvailableSection,
@@ -47,23 +47,23 @@ function CallCenterPage({ user }) {
         role="tablist"
         aria-label="Call center sections"
       >
-        {canViewAssignments && (
+        {canViewScripts && (
           <button
             type="button"
             role="tab"
             aria-selected={
-              activeSection === 'assignments'
+              activeSection === 'scripts'
             }
             className={
-              activeSection === 'assignments'
+              activeSection === 'scripts'
                 ? 'active'
                 : ''
             }
             onClick={() =>
-              setActiveSection('assignments')
+              setActiveSection('scripts')
             }
           >
-            Call assignments
+            Call scripts
           </button>
         )}
 
@@ -81,17 +81,23 @@ function CallCenterPage({ user }) {
           </button>
         )}
 
-        {canViewScripts && (
+        {canViewAssignments && (
           <button
             type="button"
             role="tab"
-            aria-selected={activeSection === 'scripts'}
-            className={
-              activeSection === 'scripts' ? 'active' : ''
+            aria-selected={
+              activeSection === 'assignments'
             }
-            onClick={() => setActiveSection('scripts')}
+            className={
+              activeSection === 'assignments'
+                ? 'active'
+                : ''
+            }
+            onClick={() =>
+              setActiveSection('assignments')
+            }
           >
-            Call scripts
+            Call assignments
           </button>
         )}
       </div>

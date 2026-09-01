@@ -144,6 +144,28 @@
   justify-content: space-between;
 }
 
+.topbar-profile-only {
+  justify-content: flex-end;
+}
+
+.section-content {
+  position: relative;
+}
+
+.section-content .topbar-profile-only {
+  position: absolute;
+  top: 28px;
+  right: 34px;
+  z-index: 20;
+  margin: 0;
+}
+
+.section-content .page-heading {
+  min-height: 55px;
+  padding-right: 310px;
+  align-items: flex-start;
+}
+
 .eyebrow {
   margin: 0 0 5px;
   color: #6c7b8f;
@@ -322,6 +344,113 @@
   box-shadow: 0 5px 18px rgb(24 49 79 / 5%);
 }
 
+.settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.75fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 18px;
+}
+
+.settings-field-wide {
+  grid-column: 1 / -1;
+}
+
+.settings-form .form-field small {
+  color: #78879a;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.settings-form .settings-field-error {
+  color: #a23434;
+}
+
+.settings-color-control {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 10px;
+}
+
+.settings-color-control input[type='color'] {
+  height: 43px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.settings-actions {
+  padding-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #edf1f5;
+}
+
+.settings-summary h3 {
+  margin: 0 0 18px;
+  color: #1b3553;
+  font-size: 20px;
+}
+
+.settings-summary .details-list div {
+  grid-template-columns: 120px 1fr;
+}
+
+.settings-preview {
+  margin-top: 20px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #dce5ef;
+  border-radius: 11px;
+  background: #f7fafc;
+}
+
+.settings-preview > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.settings-preview div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.settings-preview strong {
+  color: #203b59;
+  font-size: 13px;
+}
+
+.settings-preview small {
+  color: #78879a;
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .settings-layout,
+  .settings-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-field-wide {
+    grid-column: auto;
+  }
+}
+
 .card-heading {
   margin-bottom: 20px;
   display: flex;
@@ -453,6 +582,16 @@
   .topbar {
     align-items: flex-start;
     gap: 18px;
+  }
+
+  .section-content .topbar-profile-only {
+    position: static;
+    margin-bottom: 18px;
+  }
+
+  .section-content .page-heading {
+    min-height: 0;
+    padding-right: 0;
   }
 
   .user-profile span {

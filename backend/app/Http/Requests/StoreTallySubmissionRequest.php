@@ -71,6 +71,45 @@ class StoreTallySubmissionRequest extends FormRequest
                 }
             }
 
+            $existingIdempotentSubmission = null;
+
+            if ($this->filled('client_uuid')) {
+                $existingIdempotentSubmission = TallySubmission::query()
+                    ->where('tally_sheet_id', $sheet->id)
+                    ->where('entered_by_user_id', $this->user()->id)
+                    ->where('client_uuid', $this->input('client_uuid'))
+                    ->first();
+            }
+
+            if ($existingIdempotentSubmission !== null) {
+                return;
+            }
+
+            $recordedEntryNumbers = TallySubmission::query()
+                ->where('tally_sheet_id', $sheet->id)
+                ->pluck('entry_number')
+                ->map(fn ($entryNumber) => (int) $entryNumber);
+
+            $expectedEntryNumber = collect(TallySubmission::ENTRY_NUMBERS)
+                ->first(
+                    fn ($entryNumber) => ! $recordedEntryNumbers
+                        ->contains($entryNumber)
+                );
+
+            if (
+                $expectedEntryNumber === null
+                || $this->integer('entry_number') !== $expectedEntryNumber
+            ) {
+                $validator->errors()->add(
+                    'entry_number',
+                    $expectedEntryNumber === null
+                        ? 'Both tally entries have already been recorded.'
+                        : "The next tally entry must be entry {$expectedEntryNumber}."
+                );
+
+                return;
+            }
+
             $existingEntrant = TallySubmission::query()
                 ->where('tally_sheet_id', $sheet->id)
                 ->where('entry_number', '!=', $this->integer('entry_number'))
