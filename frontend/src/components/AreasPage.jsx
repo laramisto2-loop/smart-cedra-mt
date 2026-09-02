@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AreaForm from './AreaForm.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
+import GeographyFilters from './GeographyFilters.jsx'
 import {
   createArea,
   deleteArea,
@@ -49,6 +50,8 @@ function AreasPage({ user }) {
   const [areas, setAreas] = useState([])
   const [districts, setDistricts] = useState([])
   const [districtFilter, setDistrictFilter] = useState('')
+  const [searchDraft, setSearchDraft] = useState('')
+  const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -101,6 +104,7 @@ function AreasPage({ user }) {
         const response = await listAreas({
           page,
           districtId: districtFilter,
+          search,
         })
 
         if (!cancelled) {
@@ -128,7 +132,20 @@ function AreasPage({ user }) {
     return () => {
       cancelled = true
     }
-  }, [districtFilter, page, reloadKey])
+  }, [districtFilter, page, reloadKey, search])
+
+  function applySearch(event) {
+    event.preventDefault()
+    setPage(1)
+    setSearch(searchDraft.trim())
+  }
+
+  function clearFilters() {
+    setSearchDraft('')
+    setSearch('')
+    setDistrictFilter('')
+    setPage(1)
+  }
 
   function changeDistrictFilter(event) {
     setDistrictFilter(event.target.value)
@@ -209,24 +226,24 @@ function AreasPage({ user }) {
         )}
       </div>
 
-      <div className="filter-row">
-        <label className="filter-control">
-          <span>Filter by district</span>
-          <select
-            value={districtFilter}
-            onChange={changeDistrictFilter}
-          >
-            <option value="">All districts</option>
-
-            {districts.map((district) => (
-              <option key={district.id} value={district.id}>
-                {district.governorate?.name_en} —{' '}
-                {district.name_en}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <GeographyFilters
+        searchLabel="Search areas"
+        searchPlaceholder="English name, Arabic name, or code"
+        searchDraft={searchDraft}
+        onSearchDraftChange={setSearchDraft}
+        onSubmit={applySearch}
+        onClear={clearFilters}
+        filterLabel="Filter by district"
+        filterValue={districtFilter}
+        onFilterChange={changeDistrictFilter}
+        filterOptions={[
+          { value: '', label: 'All districts' },
+          ...districts.map((district) => ({
+            value: district.id,
+            label: `${district.governorate?.name_en} — ${district.name_en}`,
+          })),
+        ]}
+      />
 
       {districtsError && (
         <div className="error-message" role="alert">
@@ -248,7 +265,7 @@ function AreasPage({ user }) {
         {!isLoading && !error && areas.length === 0 && (
           <div className="empty-state">
             <h3>No areas found</h3>
-            <p>Add an area or select another district filter.</p>
+            <p>Add an area or change the current filters.</p>
           </div>
         )}
 

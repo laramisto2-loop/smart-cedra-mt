@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import ConfirmDialog from './ConfirmDialog.jsx'
+import GeographyFilters from './GeographyFilters.jsx'
 import PollingCenterForm from './PollingCenterForm.jsx'
 import { listAreas } from '../services/areas.js'
 import {
@@ -41,6 +42,8 @@ function PollingCentersPage({ user }) {
   const [pollingCenters, setPollingCenters] = useState([])
   const [areas, setAreas] = useState([])
   const [areaFilter, setAreaFilter] = useState('')
+  const [searchDraft, setSearchDraft] = useState('')
+  const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -95,6 +98,7 @@ function PollingCentersPage({ user }) {
         const response = await listPollingCenters({
           page,
           areaId: areaFilter,
+          search,
         })
 
         if (!cancelled) {
@@ -122,7 +126,20 @@ function PollingCentersPage({ user }) {
     return () => {
       cancelled = true
     }
-  }, [areaFilter, page, reloadKey])
+  }, [areaFilter, page, reloadKey, search])
+
+  function applySearch(event) {
+    event.preventDefault()
+    setPage(1)
+    setSearch(searchDraft.trim())
+  }
+
+  function clearFilters() {
+    setSearchDraft('')
+    setSearch('')
+    setAreaFilter('')
+    setPage(1)
+  }
 
   function changeAreaFilter(event) {
     setAreaFilter(event.target.value)
@@ -206,24 +223,24 @@ function PollingCentersPage({ user }) {
         )}
       </div>
 
-      <div className="filter-row">
-        <label className="filter-control">
-          <span>Filter by area</span>
-          <select
-            value={areaFilter}
-            onChange={changeAreaFilter}
-          >
-            <option value="">All areas</option>
-
-            {areas.map((area) => (
-              <option key={area.id} value={area.id}>
-                {area.district?.governorate?.name_en} —{' '}
-                {area.district?.name_en} — {area.name_en}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <GeographyFilters
+        searchLabel="Search polling centers"
+        searchPlaceholder="Name, address, or code"
+        searchDraft={searchDraft}
+        onSearchDraftChange={setSearchDraft}
+        onSubmit={applySearch}
+        onClear={clearFilters}
+        filterLabel="Filter by area"
+        filterValue={areaFilter}
+        onFilterChange={changeAreaFilter}
+        filterOptions={[
+          { value: '', label: 'All areas' },
+          ...areas.map((area) => ({
+            value: area.id,
+            label: `${area.district?.governorate?.name_en} — ${area.district?.name_en} — ${area.name_en}`,
+          })),
+        ]}
+      />
 
       {areasError && (
         <div className="error-message" role="alert">
@@ -249,10 +266,7 @@ function PollingCentersPage({ user }) {
           pollingCenters.length === 0 && (
             <div className="empty-state">
               <h3>No polling centers found</h3>
-              <p>
-                Add a polling center or select another area
-                filter.
-              </p>
+              <p>Add a polling center or change the current filters.</p>
             </div>
           )}
 

@@ -99,6 +99,35 @@ class DistrictApiTest extends TestCase
             ]);
     }
 
+    public function test_admin_can_search_districts_by_name_or_code(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $governorate = $this->createGovernorate(
+            $tenant,
+            'Search Governorate',
+            'SRCH-G'
+        );
+
+        $this->createDistrict(
+            $tenant,
+            $governorate,
+            'Searchable District',
+            'SRCH-D'
+        );
+        $this->createDistrict(
+            $tenant,
+            $governorate,
+            'Unrelated District',
+            'OTHER-D'
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->getJson('/api/districts?search=SRCH-D')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name_en', 'Searchable District');
+    }
+
     public function test_tenant_admin_can_create_update_and_delete_district(): void
     {
         $tenant = $this->findTenant('cedra-campaign');

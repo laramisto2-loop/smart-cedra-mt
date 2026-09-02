@@ -113,6 +113,31 @@ class AreaApiTest extends TestCase
             ]);
     }
 
+    public function test_admin_can_search_areas_by_name_or_code(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $governorate = $this->createGovernorate(
+            $tenant,
+            'Search Governorate',
+            'SRCH-G'
+        );
+        $district = $this->createDistrict(
+            $tenant,
+            $governorate,
+            'Search District',
+            'SRCH-D'
+        );
+
+        $this->createArea($tenant, $district, 'Searchable Area', 'SRCH-A');
+        $this->createArea($tenant, $district, 'Unrelated Area', 'OTHER-A');
+
+        $this->actingAs($this->cedraAdmin())
+            ->getJson('/api/areas?search=SRCH-A')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name_en', 'Searchable Area');
+    }
+
     public function test_tenant_admin_can_create_update_and_delete_area(): void
     {
         $tenant = $this->findTenant('cedra-campaign');

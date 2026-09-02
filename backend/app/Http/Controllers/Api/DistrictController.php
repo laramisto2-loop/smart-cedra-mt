@@ -20,6 +20,11 @@ class DistrictController extends Controller
         Gate::authorize('viewAny', District::class);
 
         $request->validate([
+            'search' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
             'governorate_id' => [
                 'nullable',
                 'integer',
@@ -29,6 +34,21 @@ class DistrictController extends Controller
         $districts = District::query()
             ->with('governorate')
             ->withCount('areas')
+            ->when(
+                $request->filled('search'),
+                function ($query) use ($request): void {
+                    $search = trim((string) $request->input('search'));
+
+                    $query->where(
+                        function ($searchQuery) use ($search): void {
+                            $searchQuery
+                                ->where('name_en', 'like', "%{$search}%")
+                                ->orWhere('name_ar', 'like', "%{$search}%")
+                                ->orWhere('code', 'like', "%{$search}%");
+                        }
+                    );
+                }
+            )
             ->when(
                 $request->filled('governorate_id'),
                 fn ($query) => $query->where(

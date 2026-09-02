@@ -20,6 +20,11 @@ class PollingCenterController extends Controller
         Gate::authorize('viewAny', PollingCenter::class);
 
         $request->validate([
+            'search' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
             'area_id' => [
                 'nullable',
                 'integer',
@@ -29,6 +34,23 @@ class PollingCenterController extends Controller
         $pollingCenters = PollingCenter::query()
             ->with('area.district.governorate')
             ->withCount('pollingStations')
+            ->when(
+                $request->filled('search'),
+                function ($query) use ($request): void {
+                    $search = trim((string) $request->input('search'));
+
+                    $query->where(
+                        function ($searchQuery) use ($search): void {
+                            $searchQuery
+                                ->where('name_en', 'like', "%{$search}%")
+                                ->orWhere('name_ar', 'like', "%{$search}%")
+                                ->orWhere('address_en', 'like', "%{$search}%")
+                                ->orWhere('address_ar', 'like', "%{$search}%")
+                                ->orWhere('code', 'like', "%{$search}%");
+                        }
+                    );
+                }
+            )
             ->when(
                 $request->filled('area_id'),
                 fn ($query) => $query->where(

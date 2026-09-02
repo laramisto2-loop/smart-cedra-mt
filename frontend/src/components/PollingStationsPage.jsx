@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import ConfirmDialog from './ConfirmDialog.jsx'
+import GeographyFilters from './GeographyFilters.jsx'
 import PollingStationForm from './PollingStationForm.jsx'
 import { listPollingCenters } from '../services/pollingCenters.js'
 import {
@@ -53,6 +54,8 @@ function PollingStationsPage({ user }) {
   const [pollingCenters, setPollingCenters] = useState([])
   const [pollingCenterFilter, setPollingCenterFilter] =
     useState('')
+  const [searchDraft, setSearchDraft] = useState('')
+  const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -110,6 +113,7 @@ function PollingStationsPage({ user }) {
         const response = await listPollingStations({
           page,
           pollingCenterId: pollingCenterFilter,
+          search,
         })
 
         if (!cancelled) {
@@ -137,7 +141,20 @@ function PollingStationsPage({ user }) {
     return () => {
       cancelled = true
     }
-  }, [page, pollingCenterFilter, reloadKey])
+  }, [page, pollingCenterFilter, reloadKey, search])
+
+  function applySearch(event) {
+    event.preventDefault()
+    setPage(1)
+    setSearch(searchDraft.trim())
+  }
+
+  function clearFilters() {
+    setSearchDraft('')
+    setSearch('')
+    setPollingCenterFilter('')
+    setPage(1)
+  }
 
   function changePollingCenterFilter(event) {
     setPollingCenterFilter(event.target.value)
@@ -221,26 +238,24 @@ function PollingStationsPage({ user }) {
         )}
       </div>
 
-      <div className="filter-row">
-        <label className="filter-control">
-          <span>Filter by polling center</span>
-          <select
-            value={pollingCenterFilter}
-            onChange={changePollingCenterFilter}
-          >
-            <option value="">All polling centers</option>
-
-            {pollingCenters.map((pollingCenter) => (
-              <option
-                key={pollingCenter.id}
-                value={pollingCenter.id}
-              >
-                {pollingCenterLabel(pollingCenter)}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <GeographyFilters
+        searchLabel="Search polling stations"
+        searchPlaceholder="Label, station number, or room"
+        searchDraft={searchDraft}
+        onSearchDraftChange={setSearchDraft}
+        onSubmit={applySearch}
+        onClear={clearFilters}
+        filterLabel="Filter by polling center"
+        filterValue={pollingCenterFilter}
+        onFilterChange={changePollingCenterFilter}
+        filterOptions={[
+          { value: '', label: 'All polling centers' },
+          ...pollingCenters.map((pollingCenter) => ({
+            value: pollingCenter.id,
+            label: pollingCenterLabel(pollingCenter),
+          })),
+        ]}
+      />
 
       {pollingCentersError && (
         <div className="error-message" role="alert">
@@ -266,10 +281,7 @@ function PollingStationsPage({ user }) {
           pollingStations.length === 0 && (
             <div className="empty-state">
               <h3>No polling stations found</h3>
-              <p>
-                Add a polling station or select another polling
-                center filter.
-              </p>
+              <p>Add a polling station or change the current filters.</p>
             </div>
           )}
 

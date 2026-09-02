@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import ConfirmDialog from './ConfirmDialog.jsx'
 import DistrictForm from './DistrictForm.jsx'
+import GeographyFilters from './GeographyFilters.jsx'
 import { listGovernorates } from '../services/governorates.js'
 import {
   createDistrict,
@@ -13,6 +14,8 @@ function DistrictsPage({ user }) {
   const [districts, setDistricts] = useState([])
   const [governorates, setGovernorates] = useState([])
   const [governorateFilter, setGovernorateFilter] = useState('')
+  const [searchDraft, setSearchDraft] = useState('')
+  const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -35,7 +38,7 @@ function DistrictsPage({ user }) {
       setGovernoratesError('')
 
       try {
-        const response = await listGovernorates(1)
+        const response = await listGovernorates({ page: 1 })
 
         if (!cancelled) {
           setGovernorates(response.data ?? [])
@@ -67,6 +70,7 @@ function DistrictsPage({ user }) {
         const response = await listDistricts({
           page,
           governorateId: governorateFilter,
+          search,
         })
 
         if (!cancelled) {
@@ -94,7 +98,20 @@ function DistrictsPage({ user }) {
     return () => {
       cancelled = true
     }
-  }, [governorateFilter, page, reloadKey])
+  }, [governorateFilter, page, reloadKey, search])
+
+  function applySearch(event) {
+    event.preventDefault()
+    setPage(1)
+    setSearch(searchDraft.trim())
+  }
+
+  function clearFilters() {
+    setSearchDraft('')
+    setSearch('')
+    setGovernorateFilter('')
+    setPage(1)
+  }
 
   function changeGovernorateFilter(event) {
     setGovernorateFilter(event.target.value)
@@ -175,26 +192,24 @@ function DistrictsPage({ user }) {
         )}
       </div>
 
-      <div className="filter-row">
-        <label className="filter-control">
-          <span>Filter by governorate</span>
-          <select
-            value={governorateFilter}
-            onChange={changeGovernorateFilter}
-          >
-            <option value="">All governorates</option>
-
-            {governorates.map((governorate) => (
-              <option
-                key={governorate.id}
-                value={governorate.id}
-              >
-                {governorate.name_en}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <GeographyFilters
+        searchLabel="Search districts"
+        searchPlaceholder="English name, Arabic name, or code"
+        searchDraft={searchDraft}
+        onSearchDraftChange={setSearchDraft}
+        onSubmit={applySearch}
+        onClear={clearFilters}
+        filterLabel="Filter by governorate"
+        filterValue={governorateFilter}
+        onFilterChange={changeGovernorateFilter}
+        filterOptions={[
+          { value: '', label: 'All governorates' },
+          ...governorates.map((governorate) => ({
+            value: governorate.id,
+            label: governorate.name_en,
+          })),
+        ]}
+      />
 
       {governoratesError && (
         <div className="error-message" role="alert">
@@ -217,7 +232,7 @@ function DistrictsPage({ user }) {
           <div className="empty-state">
             <h3>No districts found</h3>
             <p>
-              Add a district or select another governorate filter.
+              Add a district or change the current filters.
             </p>
           </div>
         )}

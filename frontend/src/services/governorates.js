@@ -4,11 +4,18 @@ async function prepareForWrite() {
   await api.get('/sanctum/csrf-cookie')
 }
 
-export async function listGovernorates(page = 1) {
+export async function listGovernorates({
+  page = 1,
+  search = '',
+} = {}) {
+  const params = { page }
+
+  if (search !== '') {
+    params.search = search
+  }
+
   const response = await api.get('/api/governorates', {
-    params: {
-      page,
-    },
+    params,
   })
 
   return response.data

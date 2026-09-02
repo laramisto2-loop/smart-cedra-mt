@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import ConfirmDialog from './ConfirmDialog.jsx'
+import GeographyFilters from './GeographyFilters.jsx'
 import GovernorateForm from './GovernorateForm.jsx'
 import {
   createGovernorate,
@@ -12,6 +13,8 @@ function GovernoratesPage({ user }) {
   const [governorates, setGovernorates] = useState([])
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState(null)
+  const [searchDraft, setSearchDraft] = useState('')
+  const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -32,7 +35,7 @@ function GovernoratesPage({ user }) {
       setError('')
 
       try {
-        const response = await listGovernorates(page)
+        const response = await listGovernorates({ page, search })
 
         if (!cancelled) {
           setGovernorates(response.data ?? [])
@@ -59,7 +62,19 @@ function GovernoratesPage({ user }) {
     return () => {
       cancelled = true
     }
-  }, [page, reloadKey])
+  }, [page, reloadKey, search])
+
+  function applySearch(event) {
+    event.preventDefault()
+    setPage(1)
+    setSearch(searchDraft.trim())
+  }
+
+  function clearFilters() {
+    setSearchDraft('')
+    setSearch('')
+    setPage(1)
+  }
 
   function openCreateForm() {
   setSelectedGovernorate(null)
@@ -130,6 +145,15 @@ async function handleDelete() {
         )}
       </div>
 
+      <GeographyFilters
+        searchLabel="Search governorates"
+        searchPlaceholder="English name, Arabic name, or code"
+        searchDraft={searchDraft}
+        onSearchDraftChange={setSearchDraft}
+        onSubmit={applySearch}
+        onClear={clearFilters}
+      />
+
       <article className="content-card geography-card">
         {isLoading && (
           <p className="state-message">Loading governorates...</p>
@@ -143,8 +167,8 @@ async function handleDelete() {
 
         {!isLoading && !error && governorates.length === 0 && (
           <div className="empty-state">
-            <h3>No governorates yet</h3>
-            <p>Create the first governorate for this campaign.</p>
+            <h3>No governorates found</h3>
+            <p>Create a governorate or change the current search.</p>
           </div>
         )}
 

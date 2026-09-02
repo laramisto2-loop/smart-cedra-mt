@@ -64,6 +64,24 @@ class GovernorateApiTest extends TestCase
             ]);
     }
 
+    public function test_admin_can_search_governorates_by_name_or_code(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+
+        $this->createGovernorate($tenant, 'Searchable North', 'SRCH-N');
+        $this->createGovernorate($tenant, 'Unrelated South', 'OTHER-S');
+
+        $admin = User::query()
+            ->where('email', 'admin@cedra.test')
+            ->firstOrFail();
+
+        $this->actingAs($admin)
+            ->getJson('/api/governorates?search=SRCH-N')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name_en', 'Searchable North');
+    }
+
     public function test_tenant_admin_can_create_update_and_delete_governorate(): void
     {
         $tenant = $this->findTenant('cedra-campaign');

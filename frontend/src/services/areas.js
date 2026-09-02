@@ -7,11 +7,16 @@ async function prepareForWrite() {
 export async function listAreas({
   page = 1,
   districtId = '',
+  search = '',
 } = {}) {
   const params = { page }
 
   if (districtId !== '') {
     params.district_id = districtId
+  }
+
+  if (search !== '') {
+    params.search = search
   }
 
   const response = await api.get('/api/areas', { params })

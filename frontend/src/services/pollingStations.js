@@ -7,11 +7,16 @@ async function prepareForWrite() {
 export async function listPollingStations({
   page = 1,
   pollingCenterId = '',
+  search = '',
 } = {}) {
   const params = { page }
 
   if (pollingCenterId !== '') {
     params.polling_center_id = pollingCenterId
+  }
+
+  if (search !== '') {
+    params.search = search
   }
 
   const response = await api.get('/api/polling-stations', {

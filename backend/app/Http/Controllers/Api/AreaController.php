@@ -20,6 +20,11 @@ class AreaController extends Controller
         Gate::authorize('viewAny', Area::class);
 
         $request->validate([
+            'search' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
             'district_id' => [
                 'nullable',
                 'integer',
@@ -29,6 +34,21 @@ class AreaController extends Controller
         $areas = Area::query()
             ->with('district.governorate')
             ->withCount('pollingCenters')
+            ->when(
+                $request->filled('search'),
+                function ($query) use ($request): void {
+                    $search = trim((string) $request->input('search'));
+
+                    $query->where(
+                        function ($searchQuery) use ($search): void {
+                            $searchQuery
+                                ->where('name_en', 'like', "%{$search}%")
+                                ->orWhere('name_ar', 'like', "%{$search}%")
+                                ->orWhere('code', 'like', "%{$search}%");
+                        }
+                    );
+                }
+            )
             ->when(
                 $request->filled('district_id'),
                 fn ($query) => $query->where(

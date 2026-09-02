@@ -90,6 +90,24 @@ class PollingStationApiTest extends TestCase
             );
     }
 
+    public function test_admin_can_search_polling_stations_by_label_number_or_room(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $pollingCenter = $this->createPollingCenterHierarchy(
+            $tenant,
+            'SRCH'
+        );
+
+        $this->createPollingStation($tenant, $pollingCenter, '901');
+        $this->createPollingStation($tenant, $pollingCenter, '902');
+
+        $this->actingAs($this->cedraAdmin())
+            ->getJson('/api/polling-stations?search=Room%20901')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.station_number', '901');
+    }
+
     public function test_tenant_admin_can_create_update_and_delete_polling_station(): void
     {
         $tenant = $this->findTenant('cedra-campaign');

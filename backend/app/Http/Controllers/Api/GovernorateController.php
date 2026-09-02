@@ -8,18 +8,42 @@ use App\Http\Requests\UpdateGovernorateRequest;
 use App\Http\Resources\GovernorateResource;
 use App\Models\Governorate;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 class GovernorateController extends Controller
 {
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         Gate::authorize('viewAny', Governorate::class);
 
+        $request->validate([
+            'search' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+        ]);
+
         $governorates = Governorate::query()
             ->withCount('districts')
+            ->when(
+                $request->filled('search'),
+                function ($query) use ($request): void {
+                    $search = trim((string) $request->input('search'));
+
+                    $query->where(
+                        function ($searchQuery) use ($search): void {
+                            $searchQuery
+                                ->where('name_en', 'like', "%{$search}%")
+                                ->orWhere('name_ar', 'like', "%{$search}%")
+                                ->orWhere('code', 'like', "%{$search}%");
+                        }
+                    );
+                }
+            )
             ->orderBy('name_en')
             ->paginate(20);
 

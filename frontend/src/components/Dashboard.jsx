@@ -92,6 +92,60 @@ const navigationItems = [
   },
 ]
 
+const navigationIconPaths = {
+  Dashboard: [
+    'M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z',
+  ],
+  Users: [
+    'M15.5 20v-1.5a4 4 0 0 0-4-4h-5a4 4 0 0 0-4 4V20',
+    'M9 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z',
+    'M17 11a3 3 0 0 0 0-6M21.5 20v-1.5a4 4 0 0 0-3-3.87',
+  ],
+  Geography: [
+    'M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z',
+    'M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+  ],
+  Contacts: [
+    'M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5v-13Z',
+    'M9.25 10a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5ZM6.5 16a2.75 2.75 0 0 1 5.5 0M14.5 8h3M14.5 12h3',
+  ],
+  Segments: [
+    'M7 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM17 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 22a4 4 0 0 1 7.5-2M10 7l4 5',
+  ],
+  Tasks: [
+    'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z',
+    'm7 12 3 3 7-7',
+  ],
+  Incidents: [
+    'M10.3 3.7 2.8 17a2 2 0 0 0 1.75 3h14.9a2 2 0 0 0 1.75-3L13.7 3.7a2 2 0 0 0-3.4 0Z',
+    'M12 9v4M12 17h.01',
+  ],
+  Results: [
+    'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  ],
+  Messaging: [
+    'M4 5h16v14H4V5Z',
+    'm4 6 8 6 8-6',
+  ],
+  'Call Center': [
+    'M21 16.5v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6.02-6A19.8 19.8 0 0 1 1.1 3.77 2 2 0 0 1 3.08 1.6h3a2 2 0 0 1 2 1.72c.13.96.36 1.89.68 2.79a2 2 0 0 1-.45 2.11L7.04 9.58a16 16 0 0 0 7.38 7.38l1.36-1.36a2 2 0 0 1 2.11-.45c.9.32 1.83.55 2.79.68A2 2 0 0 1 21 16.5Z',
+  ],
+  Settings: [
+    'M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z',
+    'M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20.3h-3v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7.08 15a1.7 1.7 0 0 0-1.55-1H5.45v-3h.08a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V4.7h3v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.55 1h.09v3h-.09a1.7 1.7 0 0 0-1.55 1Z',
+  ],
+}
+
+function NavigationIcon({ label }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      {(navigationIconPaths[label] ?? []).map((path) => (
+        <path d={path} key={path} />
+      ))}
+    </svg>
+  )
+}
+
 const capabilityAccessItems = [
   {
     label: 'CRM contacts',
@@ -247,6 +301,7 @@ function Dashboard({ user, onLogout }) {
     || 'ElectoFlow'
   const primaryColor = tenantSettings.primary_color
     || '#28a9e2'
+  const tenantInitial = user.tenant.name.charAt(0).toUpperCase()
 
   useEffect(() => {
     if (activePage !== 'Dashboard') {
@@ -392,13 +447,25 @@ const logoutMessage =
         </div>
 
         <div className="tenant-card">
-          <span className="tenant-label">Current tenant</span>
-          <strong>{user.tenant.name}</strong>
+          <div className="tenant-card-heading">
+            <span
+              className="tenant-symbol"
+              style={{ backgroundColor: primaryColor }}
+            >
+              {tenantInitial}
+            </span>
+            <div>
+              <span className="tenant-label">Current workspace</span>
+              <strong>{user.tenant.name}</strong>
+            </div>
+          </div>
           <span className="tenant-status">
             <span className="status-dot" />
             {tenantStatus}
           </span>
         </div>
+
+        <p className="navigation-label">Workspace</p>
 
         <nav
           className="navigation"
@@ -418,7 +485,7 @@ const logoutMessage =
                 className="navigation-icon"
                 aria-hidden="true"
               >
-                {item.icon}
+                <NavigationIcon label={item.label} />
               </span>
               <span>{item.label}</span>
             </button>
@@ -426,8 +493,11 @@ const logoutMessage =
         </nav>
 
         <div className="sidebar-footer">
-          <p>Multi-tenant environment</p>
-          <span>Tenant ID: {user.tenant.id}</span>
+          <span className="sidebar-secure-icon">✓</span>
+          <div>
+            <p>Protected workspace</p>
+            <span>Tenant isolated · ID {user.tenant.id}</span>
+          </div>
         </div>
       </aside>
 
@@ -455,7 +525,10 @@ const logoutMessage =
           )}
 
           <div className="user-profile">
-            <div className="user-avatar">{initials}</div>
+            <div className="user-avatar">
+              {initials}
+              <span className="user-presence" />
+            </div>
 
             <div className="user-details">
               <strong>{user.name}</strong>

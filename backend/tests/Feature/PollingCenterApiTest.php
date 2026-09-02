@@ -96,6 +96,31 @@ class PollingCenterApiTest extends TestCase
             ]);
     }
 
+    public function test_admin_can_search_polling_centers_by_name_or_code(): void
+    {
+        $tenant = $this->findTenant('cedra-campaign');
+        $area = $this->createAreaHierarchy($tenant, 'SRCH');
+
+        $this->createPollingCenter(
+            $tenant,
+            $area,
+            'Searchable Center',
+            'SRCH-PC'
+        );
+        $this->createPollingCenter(
+            $tenant,
+            $area,
+            'Unrelated Center',
+            'OTHER-PC'
+        );
+
+        $this->actingAs($this->cedraAdmin())
+            ->getJson('/api/polling-centers?search=SRCH-PC')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name_en', 'Searchable Center');
+    }
+
     public function test_tenant_admin_can_create_update_and_delete_polling_center(): void
     {
         $tenant = $this->findTenant('cedra-campaign');
