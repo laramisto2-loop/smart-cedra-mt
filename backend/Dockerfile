@@ -26,4 +26,5 @@ RUN sed -i 's/\r$//' /usr/local/bin/electoflow-entrypoint \
 EXPOSE 8000
 
 ENTRYPOINT ["/usr/local/bin/electoflow-entrypoint"]
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Preserve Compose environment variables instead of reloading the host .env.
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000", "--no-reload"]
