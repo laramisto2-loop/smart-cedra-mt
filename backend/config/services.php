@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+        'infobip' => [
+        'enabled' => env('INFOBIP_ENABLED', false),
+        'base_url' => env('INFOBIP_API_BASE_URL'),
+        'api_key' => env('INFOBIP_API_KEY'),
+        'whatsapp' => [
+            'sender' => env('INFOBIP_WHATSAPP_SENDER'),
+            'template' => env(
+                'INFOBIP_WHATSAPP_TEMPLATE',
+                'test_whatsapp_template_en'
+            ),
+        ],
+    ],
+
 ];

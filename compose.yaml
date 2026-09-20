@@ -66,6 +66,29 @@ services:
       start_period: 5m
     restart: unless-stopped
 
+  backend-test:
+    build:
+      context: ./backend
+    profiles: ["test"]
+    entrypoint: ["php", "artisan", "test"]
+    environment:
+      <<: *backend-environment
+      APP_ENV: testing
+      APP_DEBUG: "true"
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ":memory:"
+      DB_URL: ""
+      SESSION_DRIVER: array
+      CACHE_STORE: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+      RUN_MIGRATIONS: "false"
+      SEED_DATABASE: "false"
+    network_mode: "none"
+    volumes:
+      - ./backend:/var/www/html
+      - backend_vendor:/var/www/html/vendor
+
   worker:
     build:
       context: ./backend

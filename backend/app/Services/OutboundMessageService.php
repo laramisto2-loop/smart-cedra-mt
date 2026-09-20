@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendOutboundMessage;
 use App\Models\Contact;
 use App\Models\ContactConsent;
 use App\Models\MessageDeliveryEvent;
@@ -47,7 +48,7 @@ class OutboundMessageService
             return $this->loadRelations($existingMessage);
         }
 
-        return DB::transaction(function () use (
+        $message = DB::transaction(function () use (
             $attributes,
             $clientUuid,
             $sender,
@@ -141,8 +142,33 @@ class OutboundMessageService
                 ]);
             }
 
-            return $this->loadRelations($message);
+                        return $this->loadRelations($message);
         });
+
+        if (
+            (bool) config('services.infobip.enabled')
+            && $message->channel === 'whatsapp'
+            && in_array(
+                $message->status,
+                ['queued', 'scheduled'],
+                true
+            )
+        ) {
+            $pendingDispatch = SendOutboundMessage::dispatch(
+                $message->id
+            );
+
+            if (
+                $message->status === 'scheduled'
+                && $message->scheduled_at !== null
+            ) {
+                $pendingDispatch->delay(
+                    $message->scheduled_at
+                );
+            }
+        }
+
+        return $message;
     }
 
     /**
